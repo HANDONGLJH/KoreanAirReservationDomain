@@ -34,20 +34,20 @@ language: ko
 
 | 단계 | 발표 내용 | 본문 위치 |
 | :---: | :--- | :---: |
-| **1** | 🩹 지난주 outline에서 빠뜨렸던 부분을 어떻게 채웠는지 | [§1](#-1-시스템과-팀) · [§5](#-5-uml-다이어그램-신규-추가) |
-| **2** | 🚀 Iteration 1 walking skeleton 시연 | [§6](#-6-iteration-1-구현-신규-추가) |
-| **3** | 🔮 Iteration 2에서 무엇을 구현할지 | [§6.6](#-66-다음-iteration-개요) |
+| **1** | 🩹 지난주 outline에서 빠뜨렸던 부분을 어떻게 채웠는지 | [1번](#-1-시스템과-팀) · [5번](#-5-uml-다이어그램-신규-추가) |
+| **2** | 🚀 Iteration 1 walking skeleton 시연 | [6번](#-6-iteration-1-구현-신규-추가) |
+| **3** | 🔮 Iteration 2에서 무엇을 구현할지 | [6.6번](#-66-다음-iteration-개요) |
 
 ### 🩹 새로 채운 부분 한눈에
 
 | | 섹션 | 채운 내용 |
 | :---: | :--- | :--- |
-| ✨ | **§1 시스템과 팀** | 시스템 제목 · 소스 베이스라인(`KoreanAirReservationDomain` Eclipse 프로젝트) · ECB 계층별 팀 분담 |
-| ✏️ | **§2 표 헤더 + 분포 근거** | `i` → `구현 iteration (1/2/3/4)` 라벨 명확화, iteration 분배 논리 추가 |
-| 💡 | **§3 채택 근거** | 각 패턴이 *왜* 그 iteration에 필요한지 (shotgun surgery, OCP 등 설계 원칙 언어로) |
-| 🎨 | **§5 UML 4종** | Use Case · Class (속성·연산 풀) · Sequence · State (Mermaid 자동 생성) |
-| 🚀 | **§6 Iteration 1 구현** | Walking Skeleton 8단계 · 11개 패키지 · State 패턴 3단 위임 구조 · 핵심 클래스 표 · 의도적 한계 4건 |
-| 🔮 | **§6.6 Iteration 2~4 개요** | Strategy / Observer / Singleton + Factory Method 구현 계획 한 문단 |
+| ✨ | **1번 시스템과 팀** | 시스템 제목 · 소스 베이스라인(`KoreanAirReservationDomain` Eclipse 프로젝트) · ECB 계층별 팀 분담 |
+| ✏️ | **2번 표 헤더 + 분포 근거** | `i` → `구현 iteration (1/2/3/4)` 라벨 명확화, iteration 분배 논리 추가 |
+| 💡 | **3번 채택 근거** | 각 패턴이 *왜* 그 iteration에 필요한지 (shotgun surgery, OCP 등 설계 원칙 언어로) |
+| 🎨 | **5번 UML 4종** | Use Case · Class (속성·연산 풀) · Sequence · State (Mermaid 자동 생성) |
+| 🚀 | **6번 Iteration 1 구현** | Walking Skeleton 8단계 · 11개 패키지 · State 패턴 3단 위임 구조 · 핵심 클래스 표 · 의도적 한계 4건 |
+| 🔮 | **6.6번 Iteration 2~4 개요** | Strategy / Observer / Singleton + Factory Method 구현 계획 한 문단 |
 
 ---
 
@@ -77,7 +77,7 @@ language: ko
 
 ### <span style="color:red">1.2 소스 베이스라인</span>
 
-<span style="color:red">구현체는 Eclipse 자바 프로젝트 `KoreanAirReservationDomain`에 위치한다. 본 제출 시점 기준으로 자바 소스 69개가 11개 패키지에 정리되어 있다 (자세한 구성은 §6.2). §5의 4종 UML 다이어그램은 손으로 그린 것이 아니라, `com.koreanair.reservation.tools` 패키지의 AmaterasUML 에미터 클래스 — `GenerateUseCaseDiagram`, `GenerateClassDiagram`, `GenerateSequenceDiagrams`, `GenerateStateDiagrams` — 가 소스 트리에서 AmaterasUML XML 파일을 자동 생성하고, 이것을 Eclipse에서 열어 PNG로 export한 결과물이다.</span>
+<span style="color:red">구현체는 Eclipse 자바 프로젝트 `KoreanAirReservationDomain`에 위치한다. 본 제출 시점 기준으로 자바 소스 69개가 11개 패키지에 정리되어 있다 (자세한 구성은 6.2). 5의 4종 UML 다이어그램은 손으로 그린 것이 아니라, `com.koreanair.reservation.tools` 패키지의 AmaterasUML 에미터 클래스 — `GenerateUseCaseDiagram`, `GenerateClassDiagram`, `GenerateSequenceDiagrams`, `GenerateStateDiagrams` — 가 소스 트리에서 AmaterasUML XML 파일을 자동 생성하고, 이것을 Eclipse에서 열어 PNG로 export한 결과물이다.</span>
 
 <span style="color:red">다이어그램을 손으로 그리지 않고 소스에서 자동 생성하는 데에는 분명한 이유가 있다. iteration이 진행될수록 설계는 반복적으로 변하며, 클래스 다이어그램의 한 변경은 시퀀스 다이어그램(참여자가 클래스 메서드와 일치해야 함)과 상태 다이어그램(전이가 해당 엔티티의 메서드로 뒷받침되어야 함)으로 연쇄된다. 클래스 시그니처가 바뀔 때마다 4종 다이어그램을 손으로 다시 그리는 것은 느리고 오류도 많다. 에미터 패턴을 쓰면 단 한 번의 소스 변경이 한 번의 rebuild로 모든 종속 다이어그램에 전파된다 — "그림 그리기"보다는 "문서 컴파일"에 가깝다.</span>
 
@@ -595,7 +595,7 @@ stateDiagram-v2
 > [!TIP]
 > 🔮 **발표 단계 3 / 3** — 다음 주에 무엇을 구현할지 (마무리 슬라이드)
 
-<span style="color:red">iteration 2는 Strategy 패턴을 `RefundPolicy` family(`NoRefundPolicy`, `PartialRefundPolicy`, `FullRefundPolicy`)로 도입하여 `ConfirmedState.issueTicket`, 취소 체인(`CancellationRequestedState`, `CancelledState.requestRefund`, `RefundRequestedState.processRefundDecision`), `RefundHandler`의 본문을 채우고, 같은 작업에서 `FlightSearchService.search`에 실제 predicate를 도입하고 `AuthService.login`에 salted-hash 검증을 붙이며 Feature Inventory의 Authentication / Reservation Lookup / Cancellation-and-Refund / e-Ticket 발급 행을 모두 점등시킨다. iteration 3는 Observer를 도입하여 `Reservation.setState`, `FlightSchedule.changeStatus`, `Payment.fail`에서 이벤트를 발행하고, 이를 결제 자동 취소(좌석 해제), 환승·multi-city 일정(MCT layover 검증 포함), `SkypassInterface`와 연동된 마일리지 클러스터의 동력으로 사용한다. iteration 4는 전역 폰트·언어·통화 설정용 `AppConfig` singleton(`volatile` + double-checked locking), 세 가지 itinerary 변형을 위한 옵션 Factory Method(`ItineraryFactory`), 예외 환불 관리자 경로, e-Ticket PDF 다운로드와 실시간 추적으로 마무리한다 — 이 시점에 §2의 모든 행이 출시 상태이고, 8개 `*State` 클래스에 `TODO(iterN)` 마커가 남지 않으며, §6.1의 walking-skeleton happy path가 `App.main(...)`에서 변경 없이 그대로 동작하여 회귀 검증 역할을 한다.</span>
+<span style="color:red">iteration 2는 Strategy 패턴을 `RefundPolicy` family(`NoRefundPolicy`, `PartialRefundPolicy`, `FullRefundPolicy`)로 도입하여 `ConfirmedState.issueTicket`, 취소 체인(`CancellationRequestedState`, `CancelledState.requestRefund`, `RefundRequestedState.processRefundDecision`), `RefundHandler`의 본문을 채우고, 같은 작업에서 `FlightSearchService.search`에 실제 predicate를 도입하고 `AuthService.login`에 salted-hash 검증을 붙이며 Feature Inventory의 Authentication / Reservation Lookup / Cancellation-and-Refund / e-Ticket 발급 행을 모두 점등시킨다. iteration 3는 Observer를 도입하여 `Reservation.setState`, `FlightSchedule.changeStatus`, `Payment.fail`에서 이벤트를 발행하고, 이를 결제 자동 취소(좌석 해제), 환승·multi-city 일정(MCT layover 검증 포함), `SkypassInterface`와 연동된 마일리지 클러스터의 동력으로 사용한다. iteration 4는 전역 폰트·언어·통화 설정용 `AppConfig` singleton(`volatile` + double-checked locking), 세 가지 itinerary 변형을 위한 옵션 Factory Method(`ItineraryFactory`), 예외 환불 관리자 경로, e-Ticket PDF 다운로드와 실시간 추적으로 마무리한다 — 이 시점에 2의 모든 행이 출시 상태이고, 8개 `*State` 클래스에 `TODO(iterN)` 마커가 남지 않으며, 6.1의 walking-skeleton happy path가 `App.main(...)`에서 변경 없이 그대로 동작하여 회귀 검증 역할을 한다.</span>
 
 ---
 
