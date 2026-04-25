@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Applications/Eclipse.app/Contents/Eclipse/dropins/amateras/eclipse/plugins/net.java.amateras.umleditor_2.3.0.202510131138.jar"/>
+	<classpathentry kind="lib" path="/Applications/Eclipse.app/Contents/Eclipse/dropins/amateras/eclipse/plugins/net.java.amateras.xstream_2.3.0.202510131138.jar"/>
+	<classpathentry kind="lib" path="/Applications/Eclipse.app/Contents/Eclipse/dropins/amateras/eclipse/plugins/net.java.amateras.umleditor.java_2.3.0.202510131138.jar"/>
+	<classpathentry kind="lib" path="/Applications/Eclipse.app/Contents/Eclipse/dropins/amateras/eclipse/plugins/net.java.amateras.db_2.3.0.202510131138.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,28 @@
+# --- Eclipse build output ---
+bin/
+out/
+target/
+
+# --- Eclipse workspace metadata ---
+.metadata/
+.recommenders/
+RemoteSystemsTempFiles/
+
+# --- Other IDEs ---
+.idea/
+*.iml
+.vscode/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Java ---
+*.class
+*.jar
+*.war
+hs_err_pid*.log
+
+# --- Logs / temp ---
+*.log
+*.tmp

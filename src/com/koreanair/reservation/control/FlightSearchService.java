@@ -1,0 +1,42 @@
+package com.koreanair.reservation.control;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.koreanair.reservation.domain.flight.FlightSchedule;
+
+/**
+ * FlightSearchService — Control 계층. Iteration 1 Walking Skeleton 전용.
+ *
+ * <p>Iteration 1: in-memory sample dataset 기반 단순 필터링.
+ *   SampleData 빌더가 주입한 in-memory catalog 에서 출발지/도착지/일자 매칭.
+ * <p>TODO(iter2): DB / 외부 GDS 연동.
+ * <p>TODO(iter3): Connecting flight 탐색 알고리즘 (Layover, MCT 검증).
+ */
+public class FlightSearchService {
+
+    private final List<FlightSchedule> catalog = new ArrayList<>();
+
+    public FlightSearchService() {
+    }
+
+    public void addSchedule(FlightSchedule schedule) {
+        catalog.add(schedule);
+    }
+
+    /**
+     * 출발지 / 도착지 / 일자로 직항편을 검색.
+     *
+     * <p>Iteration 1 에서는 기존 도메인 {@link FlightSchedule} 에 getter 가 비어 있는 속성이 많아
+     * 매칭 로직이 "catalog 전체 반환" 에 가깝다. Iteration 2 에서 도메인 getter 를 채운 뒤 실제 필터로 교체.
+     *
+     * @return 조건에 맞는 FlightSchedule 리스트.
+     */
+    public List<FlightSchedule> search(String fromAirportCode, String toAirportCode, LocalDate date) {
+        // TODO(iter2): FlightSchedule.getDepartureDateTime / Flight.getRoute() getter 가 값 반환 시
+        //              출발지/도착지/일자 매칭 필터링 적용.
+        //              현재는 등록된 전체 catalog 를 그대로 노출하여 Happy Path 를 구동.
+        return new ArrayList<>(catalog);
+    }
+}
