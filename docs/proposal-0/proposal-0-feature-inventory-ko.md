@@ -10,9 +10,26 @@ status: final
 language: ko
 ---
 
-# <span style="color:red">Proposal#0 — Feature Inventory & Iteration 계획</span>
+<div align="center">
 
-<span style="color:red">**대한항공 Skypass 티켓 예약 시스템**</span>
+# ✈️ <span style="color:red">Proposal #0 — Feature Inventory & Iteration 계획</span>
+
+### <span style="color:red">대한항공 Skypass 티켓 예약 시스템</span>
+
+[![Course](https://img.shields.io/badge/ECE312-OODP%202026%20Spring-darkgreen?style=flat-square)](https://github.com/gimjungwook/KoreanAirReservationDomain)
+[![Submission](https://img.shields.io/badge/Submission-Proposal%20%230-blue?style=flat-square)](https://github.com/gimjungwook/KoreanAirReservationDomain/tree/main/docs/proposal-0)
+[![Team](https://img.shields.io/badge/Team-A%20(3%20members)-orange?style=flat-square)](#-1-시스템과-팀)
+[![Source](https://img.shields.io/badge/Code-KoreanAirReservationDomain-lightgrey?style=flat-square&logo=github)](https://github.com/gimjungwook/KoreanAirReservationDomain)
+[![Iteration](https://img.shields.io/badge/Iteration-1%20%2F%204-red?style=flat-square)](#-6-iteration-1-구현-신규-추가)
+
+[**🇬🇧 English version**](proposal-0-feature-inventory.md) · [**📂 Source code**](https://github.com/gimjungwook/KoreanAirReservationDomain)
+
+</div>
+
+> [!TIP]
+> **읽기 가이드.** §1 · §5 · §6과 색상 안내가 본 제출본에서 새로 추가한 부분(빨간색)이며, §2 · §3 · §4는 원래 Proposal#0 outline에 있던 내용을 그대로 유지했다. 발표 시에는 빨간 섹션에 시간을 더 할애하면 된다.
+
+---
 
 | <span style="color:red">항목</span> | <span style="color:red">내용</span> |
 | --- | --- |
@@ -25,7 +42,7 @@ language: ko
 
 ---
 
-## <span style="color:red">1. 시스템과 팀</span>
+## <span style="color:red">📌 1. 시스템과 팀</span>
 
 ### <span style="color:red">1.1 시스템</span>
 
@@ -57,7 +74,7 @@ language: ko
 
 ---
 
-## 2. Feature Inventory (Form #1)
+## 📊 2. Feature Inventory (Form #1)
 
 이 챕터는 설계프로젝트 #2(반복개발 실습) 첫 번째 제안 제출물에 들어가는 Feature Inventory다. 두 번째 프로젝트는 설계프로젝트 #1에서 완성한 UML 모델을 자바 데스크톱 앱으로 구현하고 2~3회의 리팩토링 iteration과 3~7개의 디자인 패턴을 통해 점진적으로 개선해 나가는 과정이며, 이 챕터가 그 출발점이다.
 
@@ -106,7 +123,7 @@ language: ko
 
 ---
 
-## Design Pattern Roadmap (minimum 3, maximum 7)
+## 🎯 Design Pattern Roadmap (minimum 3, maximum 7)
 
 설계프로젝트 #1 최종 보고서에 이미 반영된 두 패턴 — State, Strategy — 가 iteration 1·2의 주축이다. iteration 3과 4에서 Observer와 Singleton을 추가하여 총 4개를 목표로 한다. iteration 4에서 Factory Method를 도입하여 5개로 확장하는 옵션도 열어둔다. 본 과목은 패턴 개수보다 "왜 이 맥락에 이 패턴이 적합한가"를 평가하므로, 매 iteration 보고서에서 패턴 적용 전후의 구조 변화와 채택 근거를 상세히 기술한다.
 
@@ -130,7 +147,7 @@ language: ko
 
 ---
 
-## 제출용 Diagram 정책 (시러버스 기준)
+## 📐 제출용 Diagram 정책 (시러버스 기준)
 
 **Use Case Diagram.** 설계프로젝트 #1 최종 보고서를 그대로 두고, 1st iteration에서 다룰 use case만 별도 색상(예: 빨간 outline)으로 강조한다. 모든 use case는 그대로 유지하고 범위만 마킹한다.
 
@@ -144,7 +161,7 @@ language: ko
 
 ---
 
-## <span style="color:red">5. UML 다이어그램 (신규 추가)</span>
+## <span style="color:red">🎨 5. UML 다이어그램 (신규 추가)</span>
 
 > <span style="color:red">본 섹션의 4종 다이어그램은 모두 원래 Proposal#0 outline에 없던 신규 추가다. 본 문서에는 Mermaid 작업본을 싣고, 인쇄/PDF 제출본에서는 동등한 AmaterasUML PNG export로 교체한다. 1st iteration 범위는 시러버스 규칙상 Proposal#0이 빨간 마킹 대상이 없으므로 다이어그램 내부 시각 마킹이 아니라 다이어그램 아래 평문으로 설명한다.</span>
 
@@ -465,7 +482,7 @@ stateDiagram-v2
 
 ---
 
-## <span style="color:red">6. Iteration 1 구현 (신규 추가)</span>
+## <span style="color:red">🚀 6. Iteration 1 구현 (신규 추가)</span>
 
 ### <span style="color:red">6.1 Walking Skeleton 시나리오</span>
 
@@ -544,6 +561,16 @@ stateDiagram-v2
 - **`ConfirmedState.issueTicket(...)`과 `ConfirmedState.requestCancellation(...)`은 상태 전이는 수행하지만 본문이 비어 있다.** `Ticket` 객체 생성도, `RefundHandler` 호출도 아직 없다. 이는 iteration 1을 State 패턴 하나에 집중시키기 위한 비용이며, iteration 2에서 본문을 채워 Strategy 환불 family와 연결한다.
 - **`RefundHandler`, `RefundPolicy`, observer, `AppConfig` singleton, `ItineraryFactory`는 아직 코드베이스에 존재하지 않는다.** 위 로드맵에 따라 iteration 2(Strategy), 3(Observer), 4(Singleton, Factory Method)에 각각 등장한다.</span>
 
-### <span style="color:red">6.6 다음 Iteration 개요</span>
+### <span style="color:red">🔮 6.6 다음 Iteration 개요</span>
 
 <span style="color:red">iteration 2는 Strategy 패턴을 `RefundPolicy` family(`NoRefundPolicy`, `PartialRefundPolicy`, `FullRefundPolicy`)로 도입하여 `ConfirmedState.issueTicket`, 취소 체인(`CancellationRequestedState`, `CancelledState.requestRefund`, `RefundRequestedState.processRefundDecision`), `RefundHandler`의 본문을 채우고, 같은 작업에서 `FlightSearchService.search`에 실제 predicate를 도입하고 `AuthService.login`에 salted-hash 검증을 붙이며 Feature Inventory의 Authentication / Reservation Lookup / Cancellation-and-Refund / e-Ticket 발급 행을 모두 점등시킨다. iteration 3는 Observer를 도입하여 `Reservation.setState`, `FlightSchedule.changeStatus`, `Payment.fail`에서 이벤트를 발행하고, 이를 결제 자동 취소(좌석 해제), 환승·multi-city 일정(MCT layover 검증 포함), `SkypassInterface`와 연동된 마일리지 클러스터의 동력으로 사용한다. iteration 4는 전역 폰트·언어·통화 설정용 `AppConfig` singleton(`volatile` + double-checked locking), 세 가지 itinerary 변형을 위한 옵션 Factory Method(`ItineraryFactory`), 예외 환불 관리자 경로, e-Ticket PDF 다운로드와 실시간 추적으로 마무리한다 — 이 시점에 §2의 모든 행이 출시 상태이고, 8개 `*State` 클래스에 `TODO(iterN)` 마커가 남지 않으며, §6.1의 walking-skeleton happy path가 `App.main(...)`에서 변경 없이 그대로 동작하여 회귀 검증 역할을 한다.</span>
+
+---
+
+<div align="center">
+
+<sub>ECE312 객체지향 설계패턴 · 한동대학교 · 2026년 1학기 · A팀 (김정욱 · 이재호 · 김경동)</sub>
+
+<sub>Made with ☕ and the Gang-of-Four book</sub>
+
+</div>
