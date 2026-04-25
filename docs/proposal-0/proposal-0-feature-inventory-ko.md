@@ -26,8 +26,28 @@ language: ko
 
 </div>
 
-> [!TIP]
-> **읽기 가이드.** §1 · §5 · §6과 색상 안내가 본 제출본에서 새로 추가한 부분(빨간색)이며, §2 · §3 · §4는 원래 Proposal#0 outline에 있던 내용을 그대로 유지했다. 발표 시에는 빨간 섹션에 시간을 더 할애하면 된다.
+> [!IMPORTANT]
+> ### 📣 지난주 → 이번주
+> **지난주에 Proposal #0 초안을 보여드렸는데, 다시 보니 빠진 부분이 많아서 모두 채워 넣었습니다.** 빨간색이 새로 채운 부분이고, 본 발표는 그 변화를 중심으로 진행됩니다.
+
+### 🗺 발표 흐름
+
+| 단계 | 발표 내용 | 본문 위치 |
+| :---: | :--- | :---: |
+| **1** | 🩹 지난주 outline에서 빠뜨렸던 부분을 어떻게 채웠는지 | [§1](#-1-시스템과-팀) · [§5](#-5-uml-다이어그램-신규-추가) |
+| **2** | 🚀 Iteration 1 walking skeleton 시연 | [§6](#-6-iteration-1-구현-신규-추가) |
+| **3** | 🔮 Iteration 2에서 무엇을 구현할지 | [§6.6](#-66-다음-iteration-개요) |
+
+### 🩹 새로 채운 부분 한눈에
+
+| | 섹션 | 채운 내용 |
+| :---: | :--- | :--- |
+| ✨ | **§1 시스템과 팀** | 시스템 제목 · 소스 베이스라인(`KoreanAirReservationDomain` Eclipse 프로젝트) · ECB 계층별 팀 분담 |
+| ✏️ | **§2 표 헤더 + 분포 근거** | `i` → `구현 iteration (1/2/3/4)` 라벨 명확화, iteration 분배 논리 추가 |
+| 💡 | **§3 채택 근거** | 각 패턴이 *왜* 그 iteration에 필요한지 (shotgun surgery, OCP 등 설계 원칙 언어로) |
+| 🎨 | **§5 UML 4종** | Use Case · Class (속성·연산 풀) · Sequence · State (Mermaid 자동 생성) |
+| 🚀 | **§6 Iteration 1 구현** | Walking Skeleton 8단계 · 11개 패키지 · State 패턴 3단 위임 구조 · 핵심 클래스 표 · 의도적 한계 4건 |
+| 🔮 | **§6.6 Iteration 2~4 개요** | Strategy / Observer / Singleton + Factory Method 구현 계획 한 문단 |
 
 ---
 
@@ -43,6 +63,9 @@ language: ko
 ---
 
 ## <span style="color:red">📌 1. 시스템과 팀</span>
+
+> [!NOTE]
+> 🩹 **발표 단계 1 / 3** — 채운 내용 ① · 시스템 정의와 팀 분담
 
 ### <span style="color:red">1.1 시스템</span>
 
@@ -162,6 +185,9 @@ language: ko
 ---
 
 ## <span style="color:red">🎨 5. UML 다이어그램 (신규 추가)</span>
+
+> [!NOTE]
+> 🩹 **발표 단계 1 / 3** — 채운 내용 ② · UML 다이어그램 4종 (Use Case · Class · Sequence · State)
 
 > <span style="color:red">본 섹션의 4종 다이어그램은 모두 원래 Proposal#0 outline에 없던 신규 추가다. 본 문서에는 Mermaid 작업본을 싣고, 인쇄/PDF 제출본에서는 동등한 AmaterasUML PNG export로 교체한다. 1st iteration 범위는 시러버스 규칙상 Proposal#0이 빨간 마킹 대상이 없으므로 다이어그램 내부 시각 마킹이 아니라 다이어그램 아래 평문으로 설명한다.</span>
 
@@ -484,6 +510,9 @@ stateDiagram-v2
 
 ## <span style="color:red">🚀 6. Iteration 1 구현 (신규 추가)</span>
 
+> [!IMPORTANT]
+> 🚀 **발표 단계 2 / 3** — Iteration 1 Walking Skeleton 시연 (메인 데모)
+
 ### <span style="color:red">6.1 Walking Skeleton 시나리오</span>
 
 <span style="color:red">iteration 1은 반복개발의 **Walking Skeleton** 패턴을 의도적으로 따른다. 가장 작은 end-to-end 실행 경로를 가장 먼저 구축한다 — 모든 계층(Boundary, Control, Domain, 외부 Gateway)을 거치되 각 계층의 본문은 가능한 한 단순하게. 목적은 기능 완성이 아니라, 계층 사이의 이음새가 실제로 맞물리는지를 배선 단계에서 증명하는 것이다.</span>
@@ -562,6 +591,9 @@ stateDiagram-v2
 - **`RefundHandler`, `RefundPolicy`, observer, `AppConfig` singleton, `ItineraryFactory`는 아직 코드베이스에 존재하지 않는다.** 위 로드맵에 따라 iteration 2(Strategy), 3(Observer), 4(Singleton, Factory Method)에 각각 등장한다.</span>
 
 ### <span style="color:red">🔮 6.6 다음 Iteration 개요</span>
+
+> [!TIP]
+> 🔮 **발표 단계 3 / 3** — 다음 주에 무엇을 구현할지 (마무리 슬라이드)
 
 <span style="color:red">iteration 2는 Strategy 패턴을 `RefundPolicy` family(`NoRefundPolicy`, `PartialRefundPolicy`, `FullRefundPolicy`)로 도입하여 `ConfirmedState.issueTicket`, 취소 체인(`CancellationRequestedState`, `CancelledState.requestRefund`, `RefundRequestedState.processRefundDecision`), `RefundHandler`의 본문을 채우고, 같은 작업에서 `FlightSearchService.search`에 실제 predicate를 도입하고 `AuthService.login`에 salted-hash 검증을 붙이며 Feature Inventory의 Authentication / Reservation Lookup / Cancellation-and-Refund / e-Ticket 발급 행을 모두 점등시킨다. iteration 3는 Observer를 도입하여 `Reservation.setState`, `FlightSchedule.changeStatus`, `Payment.fail`에서 이벤트를 발행하고, 이를 결제 자동 취소(좌석 해제), 환승·multi-city 일정(MCT layover 검증 포함), `SkypassInterface`와 연동된 마일리지 클러스터의 동력으로 사용한다. iteration 4는 전역 폰트·언어·통화 설정용 `AppConfig` singleton(`volatile` + double-checked locking), 세 가지 itinerary 변형을 위한 옵션 Factory Method(`ItineraryFactory`), 예외 환불 관리자 경로, e-Ticket PDF 다운로드와 실시간 추적으로 마무리한다 — 이 시점에 §2의 모든 행이 출시 상태이고, 8개 `*State` 클래스에 `TODO(iterN)` 마커가 남지 않으며, §6.1의 walking-skeleton happy path가 `App.main(...)`에서 변경 없이 그대로 동작하여 회귀 검증 역할을 한다.</span>
 
