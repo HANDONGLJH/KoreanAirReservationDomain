@@ -47,7 +47,7 @@ language: ko
 | 💡 | **3번 채택 근거** | 각 패턴이 *왜* 그 iteration에 필요한지 (shotgun surgery, OCP 등 설계 원칙 언어로) |
 | 🎨 | **5번 UML 4종** | Use Case · Class (속성·연산 풀) · Sequence · State (Mermaid 자동 생성) |
 | 🚀 | **6번 Iteration 1 구현** | Walking Skeleton 8단계 · 11개 패키지 · State 패턴 3단 위임 구조 · 핵심 클래스 표 · 의도적 한계 4건 |
-| 🔮 | **6.6번 Iteration 2~4 개요** | Strategy / Observer / Singleton + Factory Method 구현 계획 한 문단 |
+| 🔮 | **6.6번 Iteration 2-4 개요** | Strategy / Observer / Singleton + Factory Method 구현 계획 한 문단 |
 
 ---
 
@@ -99,7 +99,7 @@ language: ko
 
 ## 📊 2. Feature Inventory (Form #1)
 
-이 챕터는 설계프로젝트 #2(반복개발 실습) 첫 번째 제안 제출물에 들어가는 Feature Inventory다. 두 번째 프로젝트는 설계프로젝트 #1에서 완성한 UML 모델을 자바 데스크톱 앱으로 구현하고 2~3회의 리팩토링 iteration과 3~7개의 디자인 패턴을 통해 점진적으로 개선해 나가는 과정이며, 이 챕터가 그 출발점이다.
+이 챕터는 설계프로젝트 #2(반복개발 실습) 첫 번째 제안 제출물에 들어가는 Feature Inventory다. 두 번째 프로젝트는 설계프로젝트 #1에서 완성한 UML 모델을 자바 데스크톱 앱으로 구현하고 2-3회의 리팩토링 iteration과 3-7개의 디자인 패턴을 통해 점진적으로 개선해 나가는 과정이며, 이 챕터가 그 출발점이다.
 
 기능은 두 단계 계층(Category > Sub-feature)으로 정리되며, 각 sub-feature에는 주로 어느 iteration(1 / 2 / 3 / 4)에 구현될지 표기한다. 숫자는 주된 구현 시점이며, 이후 iteration에서도 리팩토링과 패턴 적용을 통해 계속 다듬어진다.
 
@@ -239,7 +239,7 @@ flowchart LR
     UC7 -. include .-> UC10
 ```
 
-<span style="color:red">**1st iteration 범위 (Walking Skeleton).** 8개 use case가 iteration 1 happy path를 구성한다 — UC1 회원 가입, UC2 로그인/로그아웃, UC3 항공편 검색, UC4 직항 선택, UC5 일정 상세 조회, UC6 승객 정보 입력, UC7 운임 검증, UC8 결제 처리. 나머지 6개는 패턴 로드맵에 맞춰 iteration 2~4에 배분된다. UC11 예약 조회와 UC12 취소·환불은 Strategy 패턴과 함께 iteration 2에 들어가고, UC9 환승, UC10 multi-city, 그리고 UC8의 비동기 부분(결제 자동 취소)은 Observer와 함께 iteration 3에 들어가며, UC13 e-티켓 PDF·실시간 추적과 UC14 설정 변경은 Singleton과 함께 iteration 4에 들어간다.</span>
+<span style="color:red">**1st iteration 범위 (Walking Skeleton).** 8개 use case가 iteration 1 happy path를 구성한다 — UC1 회원 가입, UC2 로그인/로그아웃, UC3 항공편 검색, UC4 직항 선택, UC5 일정 상세 조회, UC6 승객 정보 입력, UC7 운임 검증, UC8 결제 처리. 나머지 6개는 패턴 로드맵에 맞춰 iteration 2-4에 배분된다. UC11 예약 조회와 UC12 취소·환불은 Strategy 패턴과 함께 iteration 2에 들어가고, UC9 환승, UC10 multi-city, 그리고 UC8의 비동기 부분(결제 자동 취소)은 Observer와 함께 iteration 3에 들어가며, UC13 e-티켓 PDF·실시간 추적과 UC14 설정 변경은 Singleton과 함께 iteration 4에 들어간다.</span>
 
 ### <span style="color:red">5.2 Class Diagram (ECB)</span>
 
@@ -562,7 +562,7 @@ stateDiagram-v2
 - **`PendingPaymentState`**는 `processPayment(ctx)`를 override하여 `ConfirmedState`로, `handlePaymentFailure(ctx)`를 override하여 `CancelledState`로 전이한다.
 - **`ConfirmedState`**는 `issueTicket(ctx)`을 override하여 `TicketedState`로, `requestCancellation(ctx)`을 override하여 `CancellationRequestedState`로 전이한다. 전이 자체는 iteration 1에서 동작하지만, `Ticket`을 발급하는 본문과 `RefundHandler`를 호출하는 본문은 iteration 2로 미뤄져 있다.</span>
 
-<span style="color:red">나머지 5개(`TicketedState`, `CancellationRequestedState`, `CancelledState`, `RefundRequestedState`, `RefundedState`)는 선언만 있고, 본문은 iteration 2~4에서 채워진다. 단 `RefundedState`는 종착 상태이므로 `AbstractReservationState`의 디폴트 거부를 그대로 상속하여 모든 전이를 거부한다.</span>
+<span style="color:red">나머지 5개(`TicketedState`, `CancellationRequestedState`, `CancelledState`, `RefundRequestedState`, `RefundedState`)는 선언만 있고, 본문은 iteration 2-4에서 채워진다. 단 `RefundedState`는 종착 상태이므로 `AbstractReservationState`의 디폴트 거부를 그대로 상속하여 모든 전이를 거부한다.</span>
 
 <span style="color:red">**왜 레거시 enum이 살아남는가.** 이전 설계는 Reservation에 `ReservationStatus` enum을 두었고, 기존 메서드 일부와 (그리고 향후 모든 보고용 쿼리가) 이를 읽는다. 그 호출자들을 깨뜨리지 않기 위해, 구상 상태의 모든 전이 메서드는 `ctx.updateStatus(ReservationStatus.X)`도 함께 호출하여 enum이 동기 상태를 유지하도록 한다. State 패턴이 전이의 진리원(source of truth)이 되고, enum은 레거시 코드가 들여다볼 수 있는 read-only view로 남는다. `Reservation` Javadoc은 이를 정리해야 할 중복이 아니라 의도적인 호환성 결정으로 기록한다.</span>
 
