@@ -108,23 +108,22 @@ public class ConfirmationPanel extends JPanel {
         amountLabel.setForeground(ModernUI.TEXT_PRIMARY);
         card.add(amountLabel, c);
 
-        JPanel centerWrap = new JPanel(new GridBagLayout());
-        centerWrap.setBackground(ModernUI.BACKGROUND);
-        c.gridx = 0; c.gridy = 0;
-        centerWrap.add(card, c);
-
-        add(centerWrap, BorderLayout.CENTER);
+        add(card, BorderLayout.CENTER);
 
         JPanel footer = new JPanel(new BorderLayout());
         footer.setBackground(ModernUI.CARD_BG);
+        footer.setOpaque(true);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, ModernUI.BORDER));
 
-        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 8));
+        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         rightBtns.setBackground(ModernUI.CARD_BG);
+        rightBtns.setOpaque(true);
 
         ticketButton.setEnabled(false);
         ticketButton.setFont(ModernUI.FONT_SMALL);
         ticketButton.setForeground(ModernUI.TEXT_SECONDARY);
+        ticketButton.setOpaque(true);
+        ticketButton.setContentAreaFilled(false);
         rightBtns.add(ticketButton);
 
         ModernUI.styleButton(homeButton);
@@ -132,7 +131,7 @@ public class ConfirmationPanel extends JPanel {
         rightBtns.add(homeButton);
 
         footer.add(rightBtns, BorderLayout.EAST);
-        footer.setPreferredSize(new Dimension(0, 54));
+        footer.setPreferredSize(new Dimension(0, 52));
         add(footer, BorderLayout.SOUTH);
     }
 

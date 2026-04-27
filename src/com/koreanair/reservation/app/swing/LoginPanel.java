@@ -156,7 +156,10 @@ public class LoginPanel extends JPanel {
         btn.setBackground(ModernUI.PRIMARY);
         btn.setBorder(BorderFactory.createEmptyBorder(14, 28, 14, 28));
         btn.setFocusPainted(false);
+        btn.setFocusable(false);
         btn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
     }
 
     private void styleButtonSecondary(JButton btn) {
@@ -167,7 +170,10 @@ public class LoginPanel extends JPanel {
                 BorderFactory.createLineBorder(ModernUI.PRIMARY, 1),
                 BorderFactory.createEmptyBorder(10, 28, 10, 28)));
         btn.setFocusPainted(false);
+        btn.setFocusable(false);
         btn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
     }
 
     private void wireEvents() {
