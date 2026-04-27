@@ -170,13 +170,18 @@ flowchart LR
 
 ### <span style="color:red">2.2 Inventory 읽는 방식</span>
 
-<span style="color:red">이 표는 전체 시스템 범위를 먼저 보여주기 위한 기준표다. 실제 발표에서는 세 번째 컬럼의 iteration 번호를 기준으로 기능을 필터링한 뒤, 다음 Design Pattern Roadmap에서 각 iteration inventory와 적용 패턴을 함께 설명한다.</span>
+- <span style="color:red">이 표는 전체 시스템 범위를 먼저 보여주기 위한 기준표다.</span>
+- <span style="color:red">세 번째 컬럼의 iteration 번호를 기준으로 기능을 필터링한다.</span>
+- <span style="color:red">다음 Design Pattern Roadmap에서 각 iteration inventory와 적용 패턴을 함께 설명한다.</span>
 
 ---
 
 ## 🎯 Design Pattern Roadmap (minimum 3, maximum 7)
 
-설계프로젝트 #1 최종 보고서에 이미 반영된 두 패턴 — State, Strategy — 가 iteration 1·2의 주축이다. iteration 3과 4에서 Observer와 Singleton을 추가하여 총 4개를 목표로 한다. iteration 4에서 Factory Method를 도입하여 5개로 확장하는 옵션도 열어둔다. 본 과목은 패턴 개수보다 "왜 이 맥락에 이 패턴이 적합한가"를 평가하므로, 아래에서는 각 iteration의 inventory와 패턴 채택 근거를 함께 설명한다.
+- 설계프로젝트 #1 최종 보고서에 이미 반영된 State, Strategy가 iteration 1·2의 주축이다.
+- iteration 3과 4에서 Observer와 Singleton을 추가하여 총 4개를 목표로 한다.
+- iteration 4에서 Factory Method를 도입하여 5개로 확장하는 옵션도 열어둔다.
+- 본 과목은 패턴 개수보다 "왜 이 맥락에 이 패턴이 적합한가"를 평가하므로, 아래에서는 각 iteration의 inventory와 패턴 채택 근거를 함께 설명한다.
 
 ### <span style="color:red">3.1 Iteration 1 - State 패턴</span>
 
@@ -191,9 +196,11 @@ flowchart LR
 | <span style="color:red">Booking Flow</span> | <span style="color:red">Fare validation</span> | <span style="color:red">결제 전 운임 규칙을 검증한다.</span> |
 | <span style="color:red">Booking Flow</span> | <span style="color:red">Payment processing</span> | <span style="color:red">`PendingPayment → Confirmed` State 전이를 발생시킨다.</span> |
 
-<span style="color:red">Iteration 1은 전체 시스템을 얇게 한 번 관통하는 walking skeleton이다. 회원 등록과 로그인으로 사용자를 만들고, 항공편 검색부터 직항 선택, 승객 정보 입력, 운임 검증, 결제까지 이어지는 최소 예약 흐름을 구현한다. 이때 핵심은 기능의 완성도가 아니라 `Reservation` 생애주기가 실제 코드에서 State 패턴으로 움직인다는 점이다.</span>
-
-<span style="color:red">State 패턴 없이 구현하면 Reservation의 모든 메서드가 `ReservationStatus` enum에 대한 긴 if/else 사슬로 변질되고, 상태가 하나 추가될 때마다 모든 사슬을 순회해 수정해야 한다 — 이른바 "shotgun surgery"의 교과서 사례다. 패턴을 도입하면 각 생애주기 이벤트는 현재 상태 객체에 대한 다형 호출이 되며, 새 상태 추가는 새 클래스 작성 한 번으로 끝난다.</span>
+- <span style="color:red">Iteration 1은 전체 시스템을 얇게 한 번 관통하는 walking skeleton이다.</span>
+- <span style="color:red">회원 등록과 로그인으로 사용자를 만들고, 검색 → 직항 선택 → 승객 정보 입력 → 운임 검증 → 결제까지 최소 예약 흐름을 구현한다.</span>
+- <span style="color:red">핵심은 기능 완성도가 아니라 `Reservation` 생애주기가 실제 코드에서 State 패턴으로 움직인다는 점이다.</span>
+- <span style="color:red">State 패턴 없이 구현하면 `ReservationStatus` enum 기반 if/else 사슬이 길어지고, 상태 추가 때마다 여러 메서드를 함께 고쳐야 한다.</span>
+- <span style="color:red">State 패턴을 적용하면 생애주기 이벤트가 현재 상태 객체에 대한 다형 호출이 되고, 새 상태 추가는 새 클래스 작성으로 끝난다.</span>
 
 ### <span style="color:red">3.2 Iteration 2 - Strategy 패턴</span>
 
@@ -211,9 +218,12 @@ flowchart LR
 | <span style="color:red">Cancellation and Refund</span> | <span style="color:red">Refund disbursement</span> | <span style="color:red">결제 게이트웨이를 통해 환불 지급을 연결한다.</span> |
 | <span style="color:red">e-Ticket</span> | <span style="color:red">e-Ticket issuance</span> | <span style="color:red">PNR 생성과 발권 상태를 연결한다.</span> |
 
-<span style="color:red">Iteration 2는 iteration 1에서 만들어진 예약을 "조회하고, 발권하고, 취소 및 환불할 수 있는" 대상으로 확장한다. 회원과 비회원 모두 예약을 찾을 수 있어야 하므로 조회 기능이 먼저 들어가고, 이후 Confirmed / Ticketed 상태의 예약에 대해 취소 요청을 받는다. 환불은 운임 규칙에 따라 정책이 달라지기 때문에 Strategy 패턴의 주 적용 지점이다.</span>
-
-<span style="color:red">단순 환불 구현은 `RefundHandler.processRefund(...)` 안에 운임 클래스에 대한 switch를 두는데, 이러면 여섯 번째 운임 클래스 추가가 환불 코드, 취소 코드, 그리고 모든 보고 코드를 동시에 건드린다. Strategy는 각 환불 규칙을 `RefundPolicy`를 구현하는 별도 클래스로 패키징하고, `RefundHandler`는 어느 strategy인지 알 필요 없이 `FareRule`이 알려준 strategy를 적용한다 — 정확히 가산적(additive) 진화 (OCP).</span>
+- <span style="color:red">Iteration 2는 iteration 1에서 만들어진 예약을 조회, 발권, 취소, 환불 가능한 대상으로 확장한다.</span>
+- <span style="color:red">회원과 비회원 모두 예약을 찾을 수 있어야 하므로 예약 조회 기능이 먼저 들어간다.</span>
+- <span style="color:red">Confirmed / Ticketed 상태의 예약에 대해서만 취소 요청을 받는다.</span>
+- <span style="color:red">환불은 운임 규칙에 따라 정책이 달라지므로 Strategy 패턴의 주 적용 지점이다.</span>
+- <span style="color:red">switch 기반 환불 구현은 새 운임 클래스가 추가될 때 환불 코드, 취소 코드, 보고 코드를 함께 건드릴 위험이 있다.</span>
+- <span style="color:red">Strategy는 각 환불 규칙을 `RefundPolicy` 구현 클래스로 분리하고, `RefundHandler`는 선택된 정책만 실행하게 만든다.</span>
 
 ### <span style="color:red">3.3 Iteration 3 - Observer 패턴</span>
 
@@ -230,9 +240,11 @@ flowchart LR
 | <span style="color:red">Connecting and Multi-city</span> | <span style="color:red">Through-check-in for baggage on connections</span> | <span style="color:red">환승 여정의 수하물 연결 조건을 확인한다.</span> |
 | <span style="color:red">Connecting and Multi-city</span> | <span style="color:red">Independent fare calculation per segment</span> | <span style="color:red">multi-city 구간별 독립 운임 계산을 수행한다.</span> |
 
-<span style="color:red">Iteration 3는 단순 직항 예약을 넘어 비동기 이벤트와 복합 여정을 다룬다. 좌석 hold 만료, 결제 실패 후 자동 취소, 외부 Skypass 검증처럼 한 객체의 변화가 다른 객체나 UI 알림으로 전파되어야 하는 기능이 많아진다. 이 때문에 Observer 패턴을 도입하기 좋은 시점이다.</span>
-
-<span style="color:red">항공편 스케줄 변경은 해당 항공편의 모든 예약에 전파되어야 하고, 결제 실패 후 자동 취소는 잡고 있던 좌석을 해제해야 하며, 환불 마감 임박은 알림을 발생시켜야 한다. 이 모두가 한 엔티티가 발행한 이벤트를 0개 이상의 observer가 소비하는 형태로 자연스럽게 표현된다 — Observer가 설계된 비대칭 1:N 관계 그대로다.</span>
+- <span style="color:red">Iteration 3는 단순 직항 예약을 넘어 비동기 이벤트와 복합 여정을 다룬다.</span>
+- <span style="color:red">좌석 hold 만료, 결제 실패 후 자동 취소, 외부 Skypass 검증처럼 변화가 다른 객체나 UI 알림으로 전파되어야 하는 기능이 많아진다.</span>
+- <span style="color:red">항공편 스케줄 변경은 해당 항공편의 모든 예약에 전파되어야 한다.</span>
+- <span style="color:red">결제 실패 후 자동 취소는 잡고 있던 좌석을 해제해야 한다.</span>
+- <span style="color:red">이 구조는 한 엔티티가 이벤트를 발행하고 0개 이상의 observer가 소비하는 1:N 관계로 표현된다.</span>
 
 ### <span style="color:red">3.4 Iteration 4 - Singleton (+ Factory Method)</span>
 
@@ -244,9 +256,11 @@ flowchart LR
 | <span style="color:red">Options and Settings</span> | <span style="color:red">Font family and size change</span> | <span style="color:red">전역 UI 설정을 Singleton으로 관리한다.</span> |
 | <span style="color:red">Options and Settings</span> | <span style="color:red">Language and currency unit change</span> | <span style="color:red">언어·통화 단위 같은 전역 설정을 일관되게 반영한다.</span> |
 
-<span style="color:red">Iteration 4는 최종 polish 단계다. 일반 예약 흐름 밖에 있는 예외 환불 관리자 검토, e-티켓 PDF 다운로드, 예약 상태 실시간 추적처럼 사용자에게 완성도를 보여주는 기능을 마무리한다. 전역 설정은 애플리케이션 전체에서 같은 값이 공유되어야 하므로 Singleton 패턴의 사례로 설명한다.</span>
-
-<span style="color:red">전역 설정(폰트 family·크기, 언어, 통화 단위)은 Singleton의 교과서적 사용처다. 실행 중 인스턴스 1개, 다수 reader, lazy initialisation 허용. `volatile` 필드 + double-checked locking으로 thread interleaving에서 깨지는 toy 형태가 아니라 교과서적으로 정확한 구현을 한다. 옵션 Factory Method는 `Itinerary` 생성(Direct, Connecting, Multi-city)을 `ItineraryFactory.create(...)`로 추출하여 `new Connecting(new Direct(...))` ladder를 피한다.</span>
+- <span style="color:red">Iteration 4는 최종 polish 단계다.</span>
+- <span style="color:red">예외 환불 관리자 검토, e-티켓 PDF 다운로드, 예약 상태 실시간 추적처럼 사용자에게 완성도를 보여주는 기능을 마무리한다.</span>
+- <span style="color:red">전역 설정은 애플리케이션 전체에서 같은 값이 공유되어야 하므로 Singleton 패턴의 사례로 설명한다.</span>
+- <span style="color:red">폰트 family·크기, 언어, 통화 단위는 실행 중 단일 인스턴스로 관리하는 것이 자연스럽다.</span>
+- <span style="color:red">옵션 Factory Method는 `Itinerary` 생성(Direct, Connecting, Multi-city)을 `ItineraryFactory.create(...)`로 추출하여 생성 로직 분기를 줄인다.</span>
 
 ---
 
