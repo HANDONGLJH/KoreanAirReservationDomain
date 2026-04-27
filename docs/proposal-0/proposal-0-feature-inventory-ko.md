@@ -185,6 +185,8 @@ flowchart LR
 | <span style="color:red">Booking Flow</span> | <span style="color:red">Fare validation</span> | <span style="color:red">결제 전 운임 규칙을 검증한다.</span> |
 | <span style="color:red">Booking Flow</span> | <span style="color:red">Payment processing</span> | <span style="color:red">`PendingPayment → Confirmed` State 전이를 발생시킨다.</span> |
 
+<span style="color:red">Iteration 1은 전체 시스템을 얇게 한 번 관통하는 walking skeleton이다. 회원 등록과 로그인으로 사용자를 만들고, 항공편 검색부터 직항 선택, 승객 정보 입력, 운임 검증, 결제까지 이어지는 최소 예약 흐름을 구현한다. 이때 핵심은 기능의 완성도가 아니라 `Reservation` 생애주기가 실제 코드에서 State 패턴으로 움직인다는 점이다. 특히 승객 정보 입력은 `Initiated → PendingPayment`, 결제 성공은 `PendingPayment → Confirmed` 전이를 발생시키므로, iteration 1 발표에서는 이 두 전이를 중심으로 설명한다.</span>
+
 #### <span style="color:red">Iteration 2 Inventory - Lookup / Cancellation / Strategy</span>
 
 | <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
@@ -201,6 +203,8 @@ flowchart LR
 | <span style="color:red">Cancellation and Refund</span> | <span style="color:red">Refund disbursement</span> | <span style="color:red">결제 게이트웨이를 통해 환불 지급을 연결한다.</span> |
 | <span style="color:red">e-Ticket</span> | <span style="color:red">e-Ticket issuance</span> | <span style="color:red">PNR 생성과 발권 상태를 연결한다.</span> |
 
+<span style="color:red">Iteration 2는 iteration 1에서 만들어진 예약을 "조회하고, 발권하고, 취소 및 환불할 수 있는" 대상으로 확장한다. 회원과 비회원 모두 예약을 찾을 수 있어야 하므로 조회 기능이 먼저 들어가고, 이후 Confirmed / Ticketed 상태의 예약에 대해 취소 요청을 받는다. 환불은 운임 규칙에 따라 정책이 달라지기 때문에 Strategy 패턴의 주 적용 지점이다. 발표에서는 "환불 가능 여부 판단 → 환불 정책 선택 → 자동 환불 처리 → 결제 게이트웨이 지급" 순서로 설명하면 자연스럽다.</span>
+
 #### <span style="color:red">Iteration 3 Inventory - Async / Mileage / Observer</span>
 
 | <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
@@ -216,6 +220,8 @@ flowchart LR
 | <span style="color:red">Connecting and Multi-city</span> | <span style="color:red">Through-check-in for baggage on connections</span> | <span style="color:red">환승 여정의 수하물 연결 조건을 확인한다.</span> |
 | <span style="color:red">Connecting and Multi-city</span> | <span style="color:red">Independent fare calculation per segment</span> | <span style="color:red">multi-city 구간별 독립 운임 계산을 수행한다.</span> |
 
+<span style="color:red">Iteration 3는 단순 직항 예약을 넘어 비동기 이벤트와 복합 여정을 다룬다. 좌석 hold 만료, 결제 실패 후 자동 취소, 외부 Skypass 검증처럼 한 객체의 변화가 다른 객체나 UI 알림으로 전파되어야 하는 기능이 많아진다. 이 때문에 Observer 패턴을 도입하기 좋은 시점이다. 또한 환승과 multi-city는 단일 항공편 선택보다 검증 조건이 많으므로, layover 검증과 구간별 운임 계산을 별도 흐름으로 설명한다.</span>
+
 #### <span style="color:red">Iteration 4 Inventory - Final Polish / Singleton / Factory Method</span>
 
 | <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
@@ -225,6 +231,8 @@ flowchart LR
 | <span style="color:red">e-Ticket</span> | <span style="color:red">Real-time reservation status tracking</span> | <span style="color:red">예약 상태를 사용자에게 실시간으로 보여준다.</span> |
 | <span style="color:red">Options and Settings</span> | <span style="color:red">Font family and size change</span> | <span style="color:red">전역 UI 설정을 Singleton으로 관리한다.</span> |
 | <span style="color:red">Options and Settings</span> | <span style="color:red">Language and currency unit change</span> | <span style="color:red">언어·통화 단위 같은 전역 설정을 일관되게 반영한다.</span> |
+
+<span style="color:red">Iteration 4는 최종 polish 단계다. 일반 예약 흐름 밖에 있는 예외 환불 관리자 검토, e-티켓 PDF 다운로드, 예약 상태 실시간 추적처럼 사용자에게 완성도를 보여주는 기능을 마무리한다. 전역 설정은 애플리케이션 전체에서 같은 값이 공유되어야 하므로 Singleton 패턴의 사례로 설명한다. 선택적으로 Direct, Connecting, Multi-city 일정 생성을 Factory Method로 분리하면, 최종 iteration에서 패턴 수와 설계 완성도를 함께 높일 수 있다.</span>
 
 > <span style="color:red">**분포 근거 (신규 추가).** 위 기능-iteration 매핑은 임의가 아니다. iteration 1은 State 패턴의 happy path를 구동하는 최소 기능 묶음이고, iteration 2는 예약 조회와 취소·환불 클러스터를 추가하면서 Strategy 패턴을 도입한다. iteration 3는 결제 실패, 좌석 hold, 마일리지, 환승·multi-city처럼 이벤트 전파와 외부 검증이 필요한 기능을 묶어 Observer 적용 지점을 만든다. iteration 4는 관리자 예외 처리, PDF, 실시간 상태 추적, 전역 설정으로 마무리하며 Singleton과 선택적 Factory Method를 적용한다. 따라서 발표에서는 전체 표를 먼저 보여준 뒤, 네 개의 iteration inventory를 순서대로 넘기며 "왜 이 기능들이 같은 iteration에 묶였는지"를 설명한다.</span>
 
