@@ -97,8 +97,7 @@ public class LoginPanel extends JPanel {
         add(hint, BorderLayout.SOUTH);
 
         registerButton.addActionListener(e -> {
-            RegistrationDialog dialog = new RegistrationDialog(
-                    (JDialog) SwingUtilities.getWindowAncestor(this), authService);
+            RegistrationDialog dialog = new RegistrationDialog(null, authService);
             dialog.setVisible(true);
         });
     }
