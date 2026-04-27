@@ -34,9 +34,10 @@ import com.koreanair.reservation.domain.flight.FlightSchedule;
 public class SearchPanel extends JPanel {
 
     private final JTextField fromField = new JTextField("ICN", 6);
-    private final JTextField toField = new JTextField("LAX", 6);
+    private final JTextField toField = new JTextField("NRT", 6);
     private final JTextField dateField = new JTextField("2026-05-01", 10);
     private final JButton searchButton = new JButton("검색");
+    private final JButton detailButton = new JButton("상세 보기");
     private final JButton nextButton = new JButton("다음");
 
     private final DefaultTableModel tableModel;
@@ -88,6 +89,8 @@ public class SearchPanel extends JPanel {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         footer.setBorder(BorderFactory.createEmptyBorder(4, 10, 10, 10));
 
+        footer.add(detailButton);
+
         // 비활성 플레이스홀더 — "이 기능은 Iteration 2 예정" 을 가시화
         JButton iter2SeatMap = new JButton("좌석맵 선택 (Iteration 2 예정)");
         iter2SeatMap.setEnabled(false);
@@ -97,6 +100,7 @@ public class SearchPanel extends JPanel {
         add(footer, BorderLayout.SOUTH);
 
         searchButton.addActionListener(e -> doSearch());
+        detailButton.addActionListener(e -> showSelectedDetail());
         nextButton.addActionListener(e -> proceedWithSelection());
     }
 
@@ -128,6 +132,20 @@ public class SearchPanel extends JPanel {
     }
 
     private void proceedWithSelection() {
+        FlightSchedule selected = selectedSchedule();
+        if (selected == null) return;
+        ui.displayItineraryDetail(selected);
+        frame.onFlightSelected(selected);
+    }
+
+    private void showSelectedDetail() {
+        FlightSchedule selected = selectedSchedule();
+        if (selected != null) {
+            ui.displayItineraryDetail(selected);
+        }
+    }
+
+    private FlightSchedule selectedSchedule() {
         int row = resultTable.getSelectedRow();
         if (row < 0) {
             if (!currentResults.isEmpty()) {
@@ -135,10 +153,9 @@ public class SearchPanel extends JPanel {
                 resultTable.setRowSelectionInterval(0, 0);
             } else {
                 ui.displayError("항공편을 먼저 검색하고 선택하세요.");
-                return;
+                return null;
             }
         }
-        FlightSchedule selected = currentResults.get(row);
-        frame.onFlightSelected(selected);
+        return currentResults.get(row);
     }
 }

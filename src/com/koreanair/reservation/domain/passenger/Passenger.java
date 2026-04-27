@@ -14,6 +14,29 @@ public class Passenger {
     private String passportNumber;
     private PassengerType passengerType;
 
+    public static Passenger create(String fullName,
+                                   String contactInfo,
+                                   String passportNumber,
+                                   LocalDate dateOfBirth,
+                                   PassengerType passengerType) {
+        if (fullName == null || fullName.isBlank()) {
+            throw new IllegalArgumentException("승객 이름은 필수입니다.");
+        }
+        if (passportNumber == null || passportNumber.isBlank()) {
+            throw new IllegalArgumentException("여권번호는 필수입니다.");
+        }
+        Passenger passenger = new Passenger();
+        passenger.name = fullName.trim();
+        passenger.contactInfo = contactInfo;
+        passenger.passportNumber = passportNumber.trim();
+        passenger.dateOfBirth = dateOfBirth;
+        passenger.passengerType = passengerType != null ? passengerType : PassengerType.ADULT;
+        String[] parts = passenger.name.split("\\s+", 2);
+        passenger.firstName = parts[0];
+        passenger.lastName = parts.length > 1 ? parts[1] : "";
+        return passenger;
+    }
+
     public Long getPassengerId() {
         return passengerId;
     }

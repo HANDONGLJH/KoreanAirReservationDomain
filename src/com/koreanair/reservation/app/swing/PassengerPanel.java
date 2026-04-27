@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -15,6 +17,8 @@ import javax.swing.JTextField;
 
 import com.koreanair.reservation.control.BookingController;
 import com.koreanair.reservation.domain.flight.FlightSchedule;
+import com.koreanair.reservation.domain.passenger.Passenger;
+import com.koreanair.reservation.domain.passenger.PassengerType;
 import com.koreanair.reservation.domain.reservation.Reservation;
 import com.koreanair.reservation.domain.user.Member;
 
@@ -23,8 +27,7 @@ import com.koreanair.reservation.domain.user.Member;
  *
  * <p>이 화면 진입 시점에 {@link BookingController#initiateBooking(FlightSchedule)} 로 Reservation 을
  * 생성(Initiated)하고, "다음" 버튼 클릭 시 {@code setPassengerInfo} 를 호출해
- * Initiated → PendingPayment 전이를 유도한다. 실제 Passenger 엔티티는 Iteration 2 에서 도입 예정이므로
- * 여기서는 입력값을 받기만 하고 null 로 넘겨 전이만 트리거한다.
+ * Initiated → PendingPayment 전이를 유도한다. 입력값은 실제 Passenger 엔티티로 만들어 Reservation 에 저장한다.
  */
 public class PassengerPanel extends JPanel {
 
@@ -42,6 +45,7 @@ public class PassengerPanel extends JPanel {
 
     private FlightSchedule selected;
     private Reservation reservation;
+    private Member member;
 
     public PassengerPanel(MainFrame frame, BookingController booking, SwingReservationUI ui) {
         super(new BorderLayout());
@@ -92,6 +96,7 @@ public class PassengerPanel extends JPanel {
      */
     public void prepare(FlightSchedule selected, Member me) {
         this.selected = selected;
+        this.member = me;
         Object[] row = SwingReservationUI.toTableRow(1, selected);
         selectedFlightLabel.setText(String.format("%s (%s → %s)", row[1], row[3], row[4]));
 
@@ -115,9 +120,26 @@ public class PassengerPanel extends JPanel {
             ui.displayError("승객 이름을 입력하세요.");
             return;
         }
-        // Iteration 1: Passenger 엔티티는 아직 도입되지 않아 null 로 전달 — State 전이만 트리거.
-        // TODO(iter2): Passenger(name, passport, birth) 엔티티 생성 후 전달.
-        booking.setPassengerInfo(reservation, null);
+        LocalDate birthDate;
+        try {
+            birthDate = LocalDate.parse(birthField.getText().trim());
+        } catch (DateTimeParseException ex) {
+            ui.displayError("생년월일 형식이 올바르지 않습니다. 예: 1999-01-31");
+            return;
+        }
+        Passenger passenger;
+        try {
+            passenger = Passenger.create(
+                    nameField.getText().trim(),
+                    member != null ? member.getEmail() : null,
+                    passportField.getText().trim(),
+                    birthDate,
+                    PassengerType.ADULT);
+        } catch (IllegalArgumentException ex) {
+            ui.displayError(ex.getMessage());
+            return;
+        }
+        booking.setPassengerInfo(reservation, passenger);
         frame.onPassengerInfoEntered(reservation);
     }
 }

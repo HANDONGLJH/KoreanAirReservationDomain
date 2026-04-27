@@ -21,6 +21,10 @@ public abstract class User {
         return name;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public Reservation createReservation() {
         return null;
     }

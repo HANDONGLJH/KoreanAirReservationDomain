@@ -16,6 +16,7 @@ public class AuthService {
 
     /** 샘플 회원 저장소 — 데모용. 실제로는 DB 조회. */
     private final Map<String, Member> memberBySkypass = new HashMap<>();
+    private final Map<String, String> passwordBySkypass = new HashMap<>();
 
     /** 현재 로그인 상태 — 단일 사용자 데모 한정. */
     private Member current;
@@ -24,7 +25,17 @@ public class AuthService {
     }
 
     public void registerSample(Member member, String skypassNumber) {
+        registerMember(member, skypassNumber, "pw-stub");
+    }
+
+    public Member registerMember(Member member, String skypassNumber, String password) {
+        if (member == null || skypassNumber == null || skypassNumber.isBlank()
+                || password == null || password.isBlank()) {
+            throw new IllegalArgumentException("회원 등록 정보가 올바르지 않습니다.");
+        }
         memberBySkypass.put(skypassNumber, member);
+        passwordBySkypass.put(skypassNumber, password);
+        return member;
     }
 
     /**
@@ -35,7 +46,10 @@ public class AuthService {
         if (m == null) {
             return null;
         }
-        // TODO(iter2): password 해시 검증. 현재는 아무 문자열이나 통과.
+        String expectedPassword = passwordBySkypass.get(skypassNumber);
+        if (!passwordStub.equals(expectedPassword)) {
+            return null;
+        }
         this.current = m;
         return m;
     }

@@ -2,6 +2,7 @@ package com.koreanair.reservation.domain.flight;
 
 import java.time.LocalDateTime;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class FlightSchedule {
     private LocalDateTime departureDateTime;
     private LocalDateTime arrivalDateTime;
     private FlightStatus status;
+    private FareRule fareRule;
     private List<SeatInventory> seatInventories = new ArrayList<>();
 
     public Long getScheduleId() {
@@ -50,6 +52,14 @@ public class FlightSchedule {
         return status;
     }
 
+    public FareRule getFareRule() {
+        return fareRule;
+    }
+
+    public void setFareRule(FareRule fareRule) {
+        this.fareRule = fareRule;
+    }
+
     public List<SeatInventory> getSeatInventories() {
         return seatInventories;
     }
@@ -82,6 +92,20 @@ public class FlightSchedule {
         schedule.aircraftType = aircraftType;
         schedule.status = FlightStatus.SCHEDULED;
         return schedule;
+    }
+
+    public boolean matchesDirect(String fromAirportCode, String toAirportCode, LocalDate date) {
+        if (flight == null || flight.getRoute() == null || departureDateTime == null) {
+            return false;
+        }
+        Airport origin = flight.getRoute().getOrigin();
+        Airport destination = flight.getRoute().getDestination();
+        return origin != null
+                && destination != null
+                && origin.getAirportCode().equalsIgnoreCase(fromAirportCode)
+                && destination.getAirportCode().equalsIgnoreCase(toAirportCode)
+                && departureDateTime.toLocalDate().equals(date)
+                && isAvailableForBooking();
     }
 
     public void updateStatus(FlightStatus newStatus) {

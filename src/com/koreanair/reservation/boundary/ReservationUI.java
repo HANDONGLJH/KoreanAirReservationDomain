@@ -2,12 +2,16 @@ package com.koreanair.reservation.boundary;
 
 import com.koreanair.reservation.domain.payment.Payment;
 import com.koreanair.reservation.domain.reservation.Reservation;
+import com.koreanair.reservation.domain.flight.FlightSchedule;
 
 public interface ReservationUI {
 
     void displaySearchResults(Object flightList);
 
     void displaySeatMap(Object aircraftType);
+
+    default void displayItineraryDetail(FlightSchedule schedule) {
+    }
 
     void displayBookingConfirmation(String pnrNumber);
 

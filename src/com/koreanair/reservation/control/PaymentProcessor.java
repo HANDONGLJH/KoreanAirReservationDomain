@@ -53,7 +53,13 @@ public class PaymentProcessor {
      * TODO(iter2): 운임 클래스별 유효성 (예약 시한, 최소 체류일).
      */
     public boolean validateFareRule(FareRule rule) {
-        return rule != null && rule.getFareClass() != null;
+        return rule != null
+                && rule.getFareClass() != null
+                && !rule.getFareClass().isBlank()
+                && rule.getChangeFee() != null
+                && rule.getCancellationPenalty() != null
+                && rule.getChangeFee().signum() >= 0
+                && rule.getCancellationPenalty().signum() >= 0;
     }
 
     /**
@@ -61,6 +67,9 @@ public class PaymentProcessor {
      * TODO(iter3): segments 별 부가세, 좌석 upcharge, 마일리지 차감 반영.
      */
     public long calculateTotalAmount(long baseFare, long tax) {
+        if (baseFare <= 0 || tax < 0) {
+            throw new IllegalArgumentException("결제 금액이 올바르지 않습니다.");
+        }
         return baseFare + tax;
     }
 
@@ -69,6 +78,9 @@ public class PaymentProcessor {
      * @return Payment 객체 (성공 시 PAID, 실패 시 FAILED).
      */
     public Payment processPaymentCharge(long amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("결제 금액은 0보다 커야 합니다.");
+        }
         Payment payment = new Payment();
         payment.setAmount(BigDecimal.valueOf(amount));
         payment.setPaymentMethod(PaymentMethod.CREDIT_CARD);

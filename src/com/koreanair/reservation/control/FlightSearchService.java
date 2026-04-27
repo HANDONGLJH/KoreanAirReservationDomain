@@ -34,9 +34,12 @@ public class FlightSearchService {
      * @return 조건에 맞는 FlightSchedule 리스트.
      */
     public List<FlightSchedule> search(String fromAirportCode, String toAirportCode, LocalDate date) {
-        // TODO(iter2): FlightSchedule.getDepartureDateTime / Flight.getRoute() getter 가 값 반환 시
-        //              출발지/도착지/일자 매칭 필터링 적용.
-        //              현재는 등록된 전체 catalog 를 그대로 노출하여 Happy Path 를 구동.
-        return new ArrayList<>(catalog);
+        List<FlightSchedule> matches = new ArrayList<>();
+        for (FlightSchedule schedule : catalog) {
+            if (schedule.matchesDirect(fromAirportCode, toAirportCode, date)) {
+                matches.add(schedule);
+            }
+        }
+        return matches;
     }
 }

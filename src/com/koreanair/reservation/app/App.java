@@ -12,6 +12,8 @@ import com.koreanair.reservation.control.BookingController;
 import com.koreanair.reservation.control.FlightSearchService;
 import com.koreanair.reservation.control.PaymentProcessor;
 import com.koreanair.reservation.domain.flight.FlightSchedule;
+import com.koreanair.reservation.domain.passenger.Passenger;
+import com.koreanair.reservation.domain.passenger.PassengerType;
 import com.koreanair.reservation.domain.payment.Payment;
 import com.koreanair.reservation.domain.reservation.Reservation;
 import com.koreanair.reservation.domain.user.Member;
@@ -56,19 +58,20 @@ public final class App {
         if (results.isEmpty()) return;
 
         // --- 5) 선택 (첫 번째 결과) ---
-        FlightSchedule selected = seed.firstSchedule;   // Iteration 2 에서 검색 결과 index 로 교체.
+        FlightSchedule selected = results.get(0);
+        ui.displayItineraryDetail(selected);
         Reservation reservation = booking.initiateBooking(selected);
         reservation.setRequester(me);
         System.out.println("[BOOK] 예약 개시: PNR=" + reservation.getPnrNumber()
                 + " state=" + reservation.getStateName());
 
         // --- 6) 승객 정보 입력 ---     (State: Initiated → PendingPayment)
-        //     Iteration 1: Passenger 엔티티는 아직 생성하지 않고 null 로 호출 — State 전이만 트리거.
-        //     TODO(iter2): Member 정보 → Passenger 변환 로직 추가.
-        booking.setPassengerInfo(reservation, null);
+        Passenger passenger = Passenger.create(
+                me.getName(), me.getEmail(), "M12345678", LocalDate.of(1999, 1, 1), PassengerType.ADULT);
+        booking.setPassengerInfo(reservation, passenger);
 
         // --- 7) 결제 ---               (State: PendingPayment → Confirmed)
-        Payment payment = booking.confirmPayment(reservation, seed.defaultFareRule, 450_000L, 50_000L);
+        Payment payment = booking.confirmPayment(reservation, selected.getFareRule(), 450_000L, 50_000L);
 
         // --- 8) 확정 화면 ---
         ui.displayBookingConfirmation(reservation, payment);

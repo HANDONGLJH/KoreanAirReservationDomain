@@ -116,6 +116,12 @@ public class BookingController {
 
     /** 2) 선택된 flight 로 Reservation 생성 (Initiated 상태). */
     public Reservation initiateBooking(FlightSchedule selected) {
+        if (selected == null || !selected.isAvailableForBooking()) {
+            throw new IllegalArgumentException("예약 가능한 직항편을 선택해야 합니다.");
+        }
+        if (selected.getFlight() == null || selected.getFlight().getRoute() == null) {
+            throw new IllegalArgumentException("항공편 경로 정보가 없습니다.");
+        }
         Reservation r = new Reservation();
         r.setReservationNumber("PNR-" + System.currentTimeMillis());
         // Iteration 1: FlightSchedule 을 ReservationItem 으로 감싸지 않고 일단 보관 생략.

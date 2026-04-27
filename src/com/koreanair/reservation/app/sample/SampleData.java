@@ -2,6 +2,7 @@ package com.koreanair.reservation.app.sample;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import com.koreanair.reservation.control.AuthService;
 import com.koreanair.reservation.control.FlightSearchService;
@@ -76,9 +77,18 @@ public final class SampleData {
 
     // --- FlightSchedule ---
 
-    public static FlightSchedule schedule(Flight flight) {
+    public static FlightSchedule schedule(Flight flight,
+                                          long scheduleId,
+                                          LocalDateTime departure,
+                                          LocalDateTime arrival,
+                                          FareRule fareRule) {
         FlightSchedule s = new FlightSchedule();
+        setField(s, "scheduleId", scheduleId);
         setField(s, "flight", flight);
+        setField(s, "departureDateTime", departure);
+        setField(s, "arrivalDateTime", arrival);
+        setField(s, "status", com.koreanair.reservation.domain.flight.FlightStatus.SCHEDULED);
+        s.setFareRule(fareRule);
         return s;
     }
 
@@ -100,9 +110,11 @@ public final class SampleData {
         Airport nrt = airport("NRT", "Narita Intl", "Tokyo", "JP");
         Airport lax = airport("LAX", "Los Angeles Intl", "Los Angeles", "US");
 
-        // Fares
+        // Fares and fare rules
         Fare yFare = fare(BookingClass.Y, 450_000L, true);
-        Fare qFare = fare(BookingClass.Y, 380_000L, false);
+        Fare qFare = fare(BookingClass.B, 380_000L, false);
+        FareRule yRule = fareRule("Y", true, 30_000L, 100_000L);
+        FareRule bRule = fareRule("B", false, 50_000L, 180_000L);
 
         // Flights
         Flight ke001 = flight("KE001", icn, nrt, yFare);
@@ -110,20 +122,26 @@ public final class SampleData {
         Flight ke123 = flight("KE123", nrt, lax, yFare);
 
         // Schedules
-        FlightSchedule sch001 = schedule(ke001);
-        FlightSchedule sch017 = schedule(ke017);
-        FlightSchedule sch123 = schedule(ke123);
+        FlightSchedule sch001 = schedule(ke001, 1L,
+                LocalDateTime.of(2026, 5, 1, 9, 30),
+                LocalDateTime.of(2026, 5, 1, 11, 55),
+                yRule);
+        FlightSchedule sch017 = schedule(ke017, 2L,
+                LocalDateTime.of(2026, 5, 1, 14, 30),
+                LocalDateTime.of(2026, 5, 1, 8, 40),
+                bRule);
+        FlightSchedule sch123 = schedule(ke123, 3L,
+                LocalDateTime.of(2026, 5, 2, 13, 10),
+                LocalDateTime.of(2026, 5, 2, 7, 20),
+                yRule);
 
         search.addSchedule(sch001);
         search.addSchedule(sch017);
         search.addSchedule(sch123);
 
-        // FareRule (Iteration 1 결제 검증용)
-        FareRule yRule = fareRule("Y", true, 30_000L, 100_000L);
-
         // Member (샘플 회원 1명)
         Member me = member("김정욱", "venturers.team@gmail.com", "SKY-000-001");
-        auth.registerSample(me, "SKY-000-001");
+        auth.registerMember(me, "SKY-000-001", "pw-stub");
 
         return new SeedResult(me, sch001, yRule);
     }

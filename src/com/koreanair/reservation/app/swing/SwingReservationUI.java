@@ -52,6 +52,14 @@ public class SwingReservationUI implements ReservationUI {
     }
 
     @Override
+    public void displayItineraryDetail(FlightSchedule schedule) {
+        JOptionPane.showMessageDialog(parent,
+                formatItineraryDetail(schedule),
+                "일정 상세",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    @Override
     public void displayBookingConfirmation(String pnrNumber) {
         JOptionPane.showMessageDialog(parent,
                 "예약이 완료되었습니다.\nPNR: " + pnrNumber,
@@ -116,5 +124,24 @@ public class SwingReservationUI implements ReservationUI {
             }
         }
         return new Object[] { index, label, flightNo, origin, dest, status };
+    }
+
+    public static String formatItineraryDetail(FlightSchedule s) {
+        if (s == null) {
+            return "선택된 항공편이 없습니다.";
+        }
+        Object[] row = toTableRow(1, s);
+        StringBuilder sb = new StringBuilder();
+        sb.append("항공편: ").append(row[2]).append('\n');
+        sb.append("구간: ").append(row[3]).append(" -> ").append(row[4]).append('\n');
+        sb.append("출발: ").append(s.getDepartureDateTime()).append('\n');
+        sb.append("도착: ").append(s.getArrivalDateTime()).append('\n');
+        if (s.getFareRule() != null) {
+            sb.append("운임 클래스: ").append(s.getFareRule().getFareClass()).append('\n');
+            sb.append("환불 가능: ").append(s.getFareRule().isRefundable() ? "예" : "아니오").append('\n');
+            sb.append("변경 수수료: ").append(s.getFareRule().getChangeFee()).append(" KRW\n");
+            sb.append("취소 위약금: ").append(s.getFareRule().getCancellationPenalty()).append(" KRW");
+        }
+        return sb.toString();
     }
 }
