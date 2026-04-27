@@ -212,7 +212,7 @@ flowchart LR
 
 | <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
 | --- | --- | --- |
-| <span style="color:red">Authentication</span> | <span style="color:red">Member registration</span> | <span style="color:red">샘플 Skypass 회원을 등록해 로그인 흐름의 시작점을 만든다.</span> |
+| <span style="color:red">Authentication</span> | <span style="color:red">Member registration</span> | <span style="color:red">`RegistrationDialog`로 새 회원 가입 → `AuthService.registerMember()`로 저장.</span> |
 | <span style="color:red">Authentication</span> | <span style="color:red">Login / Logout (Skypass 회원)</span> | <span style="color:red">사용자를 식별하고 예약 진행 주체를 확정한다.</span> |
 | <span style="color:red">Flight Search and Selection</span> | <span style="color:red">Flight search</span> | <span style="color:red">예약 happy path의 첫 Boundary-Control 연결이다.</span> |
 | <span style="color:red">Flight Search and Selection</span> | <span style="color:red">Itinerary detail display</span> | <span style="color:red">선택한 항공편의 운임·좌석·수수료 정보를 확인한다.</span> |
@@ -418,8 +418,9 @@ classDiagram
     }
     class AuthService {
         -memberBySkypass : Map~String, Member~
+        -passwordBySkypass : Map~String, String~
         -current : Member
-        +registerSample(member, skypassNumber) void
+        +registerMember(member, skypassNumber, password) Member
         +login(skypassNumber, password) Member
         +logout() void
         +currentMember() Member
@@ -481,7 +482,15 @@ classDiagram
         -passportNumber : String
     }
     class Member {
-        -skypassNumber : String
+        -memberNumber : String
+        -name : String
+        -email : String
+    }
+    class RegistrationDialog {
+        <<modal dialog>>
+        +RegistrationDialog(parent, authService)
+        +doRegister() void
+        +isRegistered() boolean
     }
     class FareRule {
         -fareClass : String
@@ -513,6 +522,7 @@ classDiagram
     BookingController --> PaymentProcessor
     BookingController --> Reservation
     BookingController ..> ReservationUI
+    LoginPanel ..> RegistrationDialog
     PaymentProcessor --> PaymentGatewayInterface
     PaymentProcessor --> Payment
     PaymentProcessor --> FareRule
@@ -537,22 +547,25 @@ classDiagram
 sequenceDiagram
     actor 사용자
     participant UI as ReservationUI
-    participant BC as BookingController
+    participant RD as RegistrationDialog
     participant AS as AuthService
     participant M as Member
 
-    사용자->>UI: 회원 등록 요청
-    UI->>BC: registerSample(member, skypassNumber)
-    BC->>AS: registerSample(member, skypassNumber)
-    AS-->>BC: 등록 완료
-    BC-->>UI: 회원 등록 성공
+    사용자->>UI: "회원가입" 버튼 클릭
+    UI->>RD: new RegistrationDialog(parent, authService)
+    RD->>RD: Dialog 표시 (이름, 이메일, 회원번호, 비밀번호 입력)
+    사용자->>RD: 정보 입력 후 "회원가입" 클릭
+    RD->>RD: 입력 검증 (이메일 형식, 비밀번호 일치 등)
+    RD->>AS: registerMember(member, memberNumber, password)
+    AS-->>RD: member (등록 완료)
+    RD-->>사용자: "회원 가입이 완료되었습니다" 메시지 → Dialog 닫힘
+
+    Note over RD: 이후 로그인 화면에서 같은 회원번호로 로그인 가능
 
     사용자->>UI: 로그인 요청 (Skypass 번호, 비밀번호)
-    UI->>BC: login(skypassNumber, password)
-    BC->>AS: login(skypassNumber, password)
-    AS->>AS: memberBySkypass.get(skypassNumber)
-    AS-->>BC: Member
-    BC-->>UI: 로그인 성공 (currentMember)
+    UI->>AS: login(skypassNumber, password)
+    AS->>AS: passwordBySkypass.get(skypassNumber) 검증
+    AS-->>UI: Member (로그인 성공)
 ```
 
 - <span style="color:red">Iteration 1의 유일한 Actor는 Skypass 회원이다.</span>
@@ -681,6 +694,7 @@ stateDiagram-v2
 
 - <span style="color:red">**부트스트래핑.** `App.main`이 `AuthService`, `FlightSearchService`, `MockPaymentGateway`, `PaymentProcessor`, `BookingController`, `ReservationUI` 구현체를 인스턴스화한다.</span>
 - <span style="color:red">**샘플 데이터.** `SampleData.seedAll(auth, search)`가 Skypass 회원 1명, 공항 3곳, 항공편 3건, 운임 규칙 1건을 주입한다.</span>
+- <span style="color:red">**회원 가입.** `RegistrationDialog`가 이름·이메일·회원번호·비밀번호를 입력받고 `auth.registerMember()`로 저장한다. (Swing UI에서 "회원가입" 버튼으로 접근)</span>
 - <span style="color:red">**로그인.** `auth.login("SKY-000-001", "pw-stub")`이 등록된 Skypass 번호와 비밀번호를 검증한 뒤 `Member`를 반환한다.</span>
 - <span style="color:red">**검색.** `booking.processSearch("ICN", "NRT", 2026-05-01)`이 조건에 맞는 직항편만 반환한다.</span>
 - <span style="color:red">**상세 확인과 선택.** `ui.displayItineraryDetail(selected)`가 항공편 상세 정보를 표시하고, `booking.initiateBooking(selected)`가 새 `Reservation`을 생성한다.</span>
@@ -699,7 +713,7 @@ stateDiagram-v2
 | <span style="color:red">패키지</span> | <span style="color:red">역할</span> | <span style="color:red">Iteration 1 활성 클래스</span> |
 | --- | --- | --- |
 | <span style="color:red">`app`</span> | <span style="color:red">애플리케이션 진입점, 목 인프라</span> | <span style="color:red">`App`, `SwingApp`, `ConsoleReservationUI`, `MockPaymentGateway`, `sample.SampleData`</span> |
-| <span style="color:red">`app.swing`</span> | <span style="color:red">Swing UI 패널</span> | <span style="color:red">`MainFrame`, `LoginPanel`, `SearchPanel`, `PassengerPanel`, `PaymentPanel`, `ConfirmationPanel`, `StateBadge`</span> |
+| <span style="color:red">`app.swing`</span> | <span style="color:red">Swing UI 패널</span> | <span style="color:red">`MainFrame`, `LoginPanel`, `SearchPanel`, `PassengerPanel`, `PaymentPanel`, `ConfirmationPanel`, `StateBadge`, `RegistrationDialog`</span> |
 | <span style="color:red">`boundary`</span> | <span style="color:red">ECB Boundary 인터페이스</span> | <span style="color:red">`ReservationUI`, `PaymentGatewayInterface`, `SkypassInterface`, `GDSInterface`(설계 stub)</span> |
 | <span style="color:red">`control`</span> | <span style="color:red">ECB Control 서비스</span> | <span style="color:red">`BookingController`, `AuthService`, `FlightSearchService`, `PaymentProcessor`, `RefundHandler`(선언만, iter2에서 본격 사용)</span> |
 | <span style="color:red">`domain.reservation`</span> | <span style="color:red">Reservation 애그리거트</span> | <span style="color:red">`Reservation` (Context), `ReservationStatus`, `Itinerary`, `Segment`, `Ticket`, `ReservationItem`, `SeatAssignment`</span> |
@@ -756,7 +770,7 @@ stateDiagram-v2
 | <span style="color:red">`AbstractReservationState`</span> | <span style="color:red">Abstract</span> | <span style="color:red">디폴트 거부 — 모든 메서드가 `InvalidStateTransitionException` throw. 구상 상태는 허용 전이만 override.</span> | <span style="color:red">(디폴트 throw 8개 override)</span> |
 | <span style="color:red">`InitiatedState` / `PendingPaymentState` / `ConfirmedState`</span> | <span style="color:red">State (iter1 활성)</span> | <span style="color:red">허용 전이가 실제 코드로 연결됨.</span> | <span style="color:red">`Initiated.enterPassengerInfo → PendingPayment`; `PendingPayment.processPayment → Confirmed`; `PendingPayment.handlePaymentFailure → Cancelled`; `Confirmed.issueTicket → Ticketed` (전이만, 본문 iter2); `Confirmed.requestCancellation → CancellationRequested` (전이만, 본문 iter2)</span> |
 | <span style="color:red">`BookingController`</span> | <span style="color:red">Control</span> | <span style="color:red">Walking Skeleton 전체를 오케스트레이션.</span> | <span style="color:red">`processSearch(from, to, date)`, `initiateBooking(schedule)`, `setPassengerInfo(r, p)`, `confirmPayment(r, fareRule, baseFare, tax)`</span> |
-| <span style="color:red">`AuthService`</span> | <span style="color:red">Control</span> | <span style="color:red">hard-coded 샘플 회원 1명; Login / Logout 구동.</span> | <span style="color:red">`login(skypassNumber, password)`, `logout()`, `currentMember()`</span> |
+| <span style="color:red">`AuthService`</span> | <span style="color:red">Control</span> | <span style="color:red">in-memory 회원 저장소; 비밀번호 검증 포함.</span> | <span style="color:red">`registerMember(member, skypassNumber, password)`, `login(skypassNumber, password)`, `logout()`, `currentMember()`</span> |
 | <span style="color:red">`FlightSearchService`</span> | <span style="color:red">Control</span> | <span style="color:red">in-memory 카탈로그에서 출발지·도착지·일자·예약 가능 상태로 직항편을 필터링.</span> | <span style="color:red">`addSchedule(s)`, `search(from, to, date)`</span> |
 | <span style="color:red">`PaymentProcessor`</span> | <span style="color:red">Control</span> | <span style="color:red">운임 규칙 검증 + 게이트웨이 통한 결제 처리.</span> | <span style="color:red">`validateFareRule(FareRule)`, `calculateTotalAmount(base, tax)`, `processPaymentCharge(amount)`</span> |
 | <span style="color:red">`PaymentGatewayInterface` (mock: `MockPaymentGateway`)</span> | <span style="color:red">Boundary</span> | <span style="color:red">외부 결제 사업자 어댑터; 데모용 mock은 `true` 반환.</span> | <span style="color:red">`authorize(Payment)`</span> |
