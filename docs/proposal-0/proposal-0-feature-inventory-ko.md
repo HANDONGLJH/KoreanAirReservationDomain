@@ -269,196 +269,113 @@ flowchart LR
 > [!NOTE]
 > 🩹 **발표 단계 1 / 3** — 채운 내용 ② · UML 다이어그램 4종 (Use Case · Class · Sequence · State)
 
-> <span style="color:red">본 섹션의 4종 다이어그램은 모두 원래 Proposal#0 outline에 없던 신규 추가다. 본 문서에는 Mermaid 작업본을 싣고, 인쇄/PDF 제출본에서는 동등한 AmaterasUML PNG export로 교체한다. 1st iteration 범위는 시러버스 규칙상 Proposal#0이 빨간 마킹 대상이 없으므로 다이어그램 내부 시각 마킹이 아니라 다이어그램 아래 평문으로 설명한다.</span>
+> <span style="color:red">본 섹션의 4종 다이어그램은 Iteration 1 시연 범위만 보여준다. 전체 최종 시스템 다이어그램이 아니라, 현재 코드에서 end-to-end로 실행되는 walking skeleton을 Use Case · Class · Sequence · State 관점에서 압축한 발표용 Mermaid 작업본이다.</span>
 
-### <span style="color:red">5.1 Use Case Diagram</span>
+### <span style="color:red">5.1 Use Case Diagram - Iteration 1</span>
 
-<span style="color:red">본 시스템의 Amateras Use Case Diagram은 설계프로젝트 #1 모델을 기준으로 16개 use case와 4개 사용자/관리자 액터(Passenger, Skypass Member, Guest, Admin), 3개 외부 시스템(Payment Gateway, Skypass System, GDS)을 가진다. Proposal #0 문서의 Mermaid는 그 구조를 발표용으로 요약한 작업본이며, `src/reservationSystem.ucd`와 `GenerateUseCaseDiagram`이 제출용 다이어그램의 기준이다.</span>
+<span style="color:red">Iteration 1 발표와 시연에서는 전체 최종 시스템이 아니라, 실제로 end-to-end 실행되는 walking skeleton 범위만 보여준다. 범위는 Skypass 회원 로그인, 항공편 검색, 직항 선택, 일정 상세 확인, 승객 정보 입력, 운임 검증, 결제 처리, 예약 확정이다.</span>
 
 ```mermaid
 flowchart LR
-    Passenger((Passenger))
-    Member((Skypass Member))
-    Guest((Guest))
-    Admin((관리자))
+    Member((Skypass 회원))
     Payment((결제 게이트웨이))
-    Skypass((Skypass 시스템))
-    GDS((GDS))
 
-    UC1[Login]
-    UC2[Search Flights]
-    UC3[Book Flight]
-    UC4[Book Multi-segment Trip]
-    UC5[Select Seat]
-    UC6[Make Payment]
-    UC7[Apply Mileage]
-    UC8[View Booking]
-    UC9[Cancel Booking]
-    UC10[View e-Ticket]
-    UC11[Refund Denied]
-    UC12[Retrieve Booking by PNR]
-    UC13[Review Refund Request]
-    UC14[Manage Flight Schedule]
-    UC15[Update Flight Status]
-    UC16[Search Interline Flights]
+    UC1[회원 등록]
+    UC2[로그인 / 로그아웃]
+    UC3[항공편 검색]
+    UC4[직항 선택]
+    UC5[일정 상세 확인]
+    UC6[승객 정보 입력]
+    UC7[운임 검증]
+    UC8[결제 처리]
+    UC9[예약 확정 표시]
 
-    Passenger --- UC2
-    Passenger --- UC3
-    Passenger --- UC4
-    Passenger --- UC8
-    Passenger --- UC9
-    Passenger --- UC10
-    Guest --- UC12
     Member --- UC1
-    Member --- UC7
-    Admin --- UC1
-    Admin --- UC13
-    Admin --- UC14
-    Admin --- UC15
-    Admin --- UC11
-    UC6 --- Payment
-    UC7 --- Skypass
-    UC16 --- GDS
-    UC3 -. include .-> UC6
-    UC4 -. include .-> UC3
-    UC12 -. include .-> UC8
-    UC12 -. include .-> UC9
-    UC5 -. extend .-> UC3
-    UC7 -. extend .-> UC6
-    UC11 -. extend .-> UC9
-    UC16 -. extend .-> UC2
+    Member --- UC2
+    Member --- UC3
+    Member --- UC4
+    Member --- UC5
+    Member --- UC6
+    Member --- UC8
+    UC4 -. include .-> UC5
+    UC8 -. include .-> UC7
+    UC8 --- Payment
+    UC8 --> UC9
 ```
 
-<span style="color:red">**1st iteration 범위 (Walking Skeleton).** 현재 코드에서 end-to-end로 실행되는 범위는 `Login`, `Search Flights`, `Book Flight`, `Make Payment`의 happy path다. `Select Seat`, `Apply Mileage`, `Cancel Booking`, `View e-Ticket`, 관리자 환불 검토, GDS 환승 검색은 다이어그램에 먼저 고정한 설계 표면이며, 코드에는 컴파일 가능한 stub 또는 비활성 UI placeholder로 존재한다.</span>
+- <span style="color:red">Actor는 Skypass 회원 1명으로 제한한다.</span>
+- <span style="color:red">비회원 조회, 관리자 기능, 마일리지, 환승·multi-city, 취소·환불은 iteration 1 다이어그램에서 제외한다.</span>
+- <span style="color:red">외부 시스템은 결제 승인을 위한 `PaymentGatewayInterface`만 포함한다.</span>
+- <span style="color:red">시연 흐름은 `로그인 → 검색 → 직항 선택 → 승객 정보 입력 → 운임 검증 → 결제 → 확정` 순서다.</span>
 
-#### <span style="color:red">5.1.1 Passenger Use Case</span>
+#### <span style="color:red">5.1.1 Actor별 Use Case - Skypass 회원</span>
 
 ```mermaid
 flowchart LR
-    Passenger((Passenger))
-    Search[Search Flights]
-    Book[Book Flight]
-    Multi[Book Multi-segment Trip]
-    Pay[Make Payment]
-    View[View Booking]
-    Cancel[Cancel Booking]
-    Ticket[View e-Ticket]
-    Seat[Select Seat]
-    GDS[(GDS)]
+    Member((Skypass 회원))
+    Register[회원 등록]
+    Login[로그인 / 로그아웃]
+    Search[항공편 검색]
+    Select[직항 선택]
+    Detail[일정 상세 확인]
+    PassengerInfo[승객 정보 입력]
+    Fare[운임 검증]
+    Pay[결제 처리]
+    Confirm[예약 확정 표시]
+    Payment[(결제 게이트웨이)]
 
-    Passenger --- Search
-    Passenger --- Book
-    Passenger --- Multi
-    Passenger --- View
-    Passenger --- Cancel
-    Passenger --- Ticket
-    Book -. include .-> Pay
-    Multi -. include .-> Book
-    Seat -. extend .-> Book
-    Search -. extend .-> GDS
+    Member --> Register
+    Member --> Login
+    Member --> Search
+    Search --> Select
+    Select --> Detail
+    Select --> PassengerInfo
+    PassengerInfo --> Fare
+    Fare --> Pay
+    Pay --> Payment
+    Pay --> Confirm
 ```
 
-- <span style="color:red">Passenger는 예약의 기본 사용자다.</span>
-- <span style="color:red">항공편 검색 → 예약 → 결제 → 조회 → 취소 → e-티켓 확인까지 전체 고객 여정을 수행한다.</span>
-- <span style="color:red">Iteration 1에서는 `Search Flights`, `Book Flight`, `Make Payment` happy path만 끝까지 실행된다.</span>
-- <span style="color:red">`Book Multi-segment Trip`, `Select Seat`, GDS 연동은 이후 iteration에서 확장된다.</span>
+- <span style="color:red">이 다이어그램이 iteration 1 시연의 실제 사용자 여정이다.</span>
+- <span style="color:red">회원 등록과 로그인은 샘플 회원 기반으로 동작한다.</span>
+- <span style="color:red">직항 선택만 포함하며, 환승·multi-city 선택은 제외한다.</span>
+- <span style="color:red">결제 성공 후 예약 상태가 `Confirmed`가 되는 것을 시연한다.</span>
 
-#### <span style="color:red">5.1.2 Skypass Member Use Case</span>
+#### <span style="color:red">5.1.2 외부 시스템 - Payment Gateway</span>
 
 ```mermaid
 flowchart LR
-    Member((Skypass Member))
-    Login[Login]
-    Apply[Apply Mileage]
-    Pay[Make Payment]
-    Skypass[(Skypass System)]
+    Controller[BookingController]
+    Processor[PaymentProcessor]
+    Gateway[(MockPaymentGateway)]
+    Payment[Payment status=PAID]
+    Reservation[Reservation state=Confirmed]
 
-    Member --- Login
-    Member --- Apply
-    Apply -. extend .-> Pay
-    Apply --- Skypass
+    Controller --> Processor
+    Processor --> Gateway
+    Gateway --> Payment
+    Payment --> Reservation
 ```
 
-- <span style="color:red">Skypass Member는 로그인 이후 회원 전용 기능을 사용할 수 있다.</span>
-- <span style="color:red">`Apply Mileage`는 결제 흐름을 확장하는 use case다.</span>
-- <span style="color:red">마일리지 잔액 조회와 차감은 외부 `Skypass System` 검증과 연결된다.</span>
-- <span style="color:red">Iteration 1에서는 로그인만 포함하고, 마일리지 적용은 iteration 3에서 구현한다.</span>
+- <span style="color:red">Iteration 1의 유일한 외부 연동은 결제 게이트웨이다.</span>
+- <span style="color:red">실제 외부 PG가 아니라 `MockPaymentGateway`가 승인 성공을 반환한다.</span>
+- <span style="color:red">결제 승인 후 `Payment`는 `PAID`가 되고, `Reservation`은 `Confirmed`로 전이된다.</span>
 
-#### <span style="color:red">5.1.3 Guest Use Case</span>
+### <span style="color:red">5.2 Class Diagram (ECB) - Iteration 1</span>
 
-```mermaid
-flowchart LR
-    Guest((Guest))
-    Retrieve[Retrieve Booking by PNR]
-    View[View Booking]
-    Cancel[Cancel Booking]
-
-    Guest --- Retrieve
-    Retrieve -. include .-> View
-    Retrieve -. include .-> Cancel
-```
-
-- <span style="color:red">Guest는 로그인하지 않는 비회원 사용자다.</span>
-- <span style="color:red">PNR 기반 조회를 통해 본인의 예약을 확인한다.</span>
-- <span style="color:red">검증이 끝난 뒤 `View Booking`과 `Cancel Booking`으로 이어진다.</span>
-- <span style="color:red">비회원 검증과 예약 조회는 iteration 2에서 본격 구현한다.</span>
-
-#### <span style="color:red">5.1.4 Admin Use Case</span>
-
-```mermaid
-flowchart LR
-    Admin((Admin))
-    Login[Login]
-    Review[Review Refund Request]
-    Denied[Refund Denied]
-    Manage[Manage Flight Schedule]
-    Update[Update Flight Status]
-
-    Admin --- Login
-    Admin --- Review
-    Admin --- Manage
-    Admin --- Update
-    Admin --- Denied
-    Denied -. extend .-> Review
-```
-
-- <span style="color:red">Admin은 일반 고객 흐름 밖의 운영 기능을 담당한다.</span>
-- <span style="color:red">예외 환불 요청을 검토하고, 필요하면 환불 거절 흐름으로 이어진다.</span>
-- <span style="color:red">운항 스케줄 관리와 항공편 상태 업데이트를 수행한다.</span>
-- <span style="color:red">관리자 기능은 final polish에 가까우므로 iteration 4에 배치한다.</span>
-
-### <span style="color:red">5.2 Class Diagram (ECB)</span>
-
-<span style="color:red">클래스 다이어그램은 시스템을 ECB 3계층으로 정리한다 — 사용자나 외부 시스템과 어댑팅하는 Boundary, use case를 오케스트레이션하는 Control, 그리고 도메인 데이터와 동작을 가지는 Entity. State 패턴은 전적으로 Entity 계층에 위치하며(`Reservation`과 그 `*State` family), Control 계층(`BookingController`)을 통해 구동된다. 아래 attribute·operation 목록은 소스 파일에서 직접 가져왔으며, 식별자는 코드와 1:1 매핑되도록 영어 그대로 유지한다 (다이어그램 → 소스 추적성). private 필드는 `-`, public 메서드는 `+`로 표기한다.</span>
+<span style="color:red">Iteration 1 클래스 다이어그램은 시연 happy path에서 실제로 호출되는 Boundary, Control, Entity만 남긴다. 취소·환불, GDS, 마일리지, multi-city, 관리자 기능은 이후 iteration 범위이므로 제외한다.</span>
 
 ```mermaid
 classDiagram
     class ReservationUI {
         <<interface>>
         +displaySearchResults(flightList) void
-        +displaySeatMap(aircraftType) void
-        +displayBookingConfirmation(pnrNumber) void
         +displayBookingConfirmation(reservation, payment) void
         +displayError(message) void
     }
     class PaymentGatewayInterface {
         <<interface>>
-        +sendAuthorizationRequest(amount, paymentInfo) Object
-        +receiveTransactionResult() Object
-        +sendRefund(originalPaymentId, amount) Object
         +authorize(payment) boolean
-    }
-    class SkypassInterface {
-        <<interface>>
-        +verifyMembership(skypassNumber, password) Object
-        +getMileageBalance(skypassNumber) int
-        +deductMileage(skypassNumber, amount) boolean
-        +verifyAndDeduct(skypassNumber, amount) Object
-    }
-    class GDSInterface {
-        <<interface>>
-        +searchInterlineFlights(origin, destination) List
-        +getPartnerAvailability(flightNumber) List
     }
     class BookingController {
         -authService : AuthService
@@ -489,35 +406,17 @@ classDiagram
         +calculateTotalAmount(baseFare, tax) long
         +processPaymentCharge(amount) Payment
     }
-    class RefundHandler {
-        +evaluateRefund(pnr, fareClass) Object
-        +getRefundDetail(requestId) RefundRequest
-        +processRefund(requestId, approvedAmount) void
-        +denyRefund(requestId, reason) void
-        +getPendingRequests() List
-    }
     class Reservation {
-        -reservationId : Long
         -reservationNumber : String
-        -requester : User
         -status : ReservationStatus
-        -createdAt : LocalDateTime
         -passengers : List~Passenger~
         -payments : List~Payment~
-        -itinerary : Itinerary
-        -tickets : List~Ticket~
         -currentState : ReservationState
         +enterPassengerInfo(passenger) void
         +processPayment() void
         +handlePaymentFailure() void
-        +issueTicket() void
-        +requestCancellation() void
-        +confirmCancellation() void
-        +requestRefund() void
-        +processRefundDecision(approved) void
         +setState(next) void
         +getStateName() String
-        +canBeCancelled() boolean
     }
     class ReservationState {
         <<interface>>
@@ -525,22 +424,12 @@ classDiagram
         +enterPassengerInfo(ctx) void
         +processPayment(ctx) void
         +handlePaymentFailure(ctx) void
-        +issueTicket(ctx) void
-        +requestCancellation(ctx) void
-        +confirmCancellation(ctx) void
-        +requestRefund(ctx) void
-        +processRefundDecision(ctx, approved) void
     }
     class AbstractReservationState {
         <<abstract>>
         +enterPassengerInfo(ctx) void
         +processPayment(ctx) void
         +handlePaymentFailure(ctx) void
-        +issueTicket(ctx) void
-        +requestCancellation(ctx) void
-        +confirmCancellation(ctx) void
-        +requestRefund(ctx) void
-        +processRefundDecision(ctx, approved) void
     }
     class InitiatedState {
         +name() String
@@ -553,148 +442,59 @@ classDiagram
     }
     class ConfirmedState {
         +name() String
-        +issueTicket(ctx) void
-        +requestCancellation(ctx) void
-    }
-    class TicketedState {
-        +name() String
-        +requestCancellation(ctx) void
-    }
-    class CancellationRequestedState {
-        +name() String
-        +confirmCancellation(ctx) void
     }
     class CancelledState {
         +name() String
-        +requestRefund(ctx) void
-    }
-    class RefundRequestedState {
-        +name() String
-        +processRefundDecision(ctx, approved) void
-    }
-    class RefundedState {
-        +name() String
     }
     class Passenger {
-        -passengerId : Long
         -name : String
         -contactInfo : String
-        -firstName : String
-        -lastName : String
-        -dateOfBirth : LocalDate
-        -nationality : String
         -passportNumber : String
-        -passengerType : PassengerType
-        +getFullName() String
-        +getName() String
-        +getContactInfo() String
-        +getPassengerType() PassengerType
     }
-    class SkypassMember {
+    class Member {
         -skypassNumber : String
-        -tier : String
-        +getSkypassNumber() String
-        +getTier() String
-    }
-    class Guest {
-        -guestSessionId : String
-        +getGuestSessionId() String
-    }
-    class MileageAccount {
-        -balance : int
-        +getBalance() int
-        +updateBalance(remainingMileage) void
-    }
-    class Itinerary {
-        -tripType : String
-        +getTripType() String
-        +getSegments() List
-    }
-    class Segment {
-        -sequenceNumber : int
-        -departureTime : LocalDateTime
-        -arrivalTime : LocalDateTime
-        -connectionTime : Duration
-        +getSequenceNumber() int
-        +getDepartureTime() LocalDateTime
     }
     class FareRule {
-        -fareRuleId : Long
         -fareClass : String
         -refundable : boolean
-        -changeFee : BigDecimal
-        -cancellationPenalty : BigDecimal
-        +getFareClass() String
         +isRefundable() boolean
-        +getChangeFee() BigDecimal
-        +getCancellationPenalty() BigDecimal
     }
     class Payment {
-        -paymentId : Long
         -amount : BigDecimal
-        -paymentMethod : PaymentMethod
         -status : PaymentStatus
-        -paidAt : LocalDateTime
         +pay() void
         +fail() void
-        +isRefundable() boolean
-        +addRefund(refund) void
     }
     class FlightSchedule {
-        -scheduleId : Long
-        -flight : Flight
-        -aircraftType : AircraftType
         -departureDateTime : LocalDateTime
         -arrivalDateTime : LocalDateTime
-        -status : FlightStatus
-        +getFlightNumber() String
-        +getDuration() Duration
         +isAvailableForBooking() boolean
-        +findSeatInventory(bookingClass) SeatInventory
     }
-    class RefundPolicy {
-        <<interface>>
-        +calculateRefundAmount(baseAmount) int
-        +getRefundType() String
-    }
-    class FullRefundPolicy
-    class PartialRefundPolicy
-    class NoRefundPolicy
 
     ReservationState <|.. AbstractReservationState
     AbstractReservationState <|-- InitiatedState
     AbstractReservationState <|-- PendingPaymentState
     AbstractReservationState <|-- ConfirmedState
-    AbstractReservationState <|-- TicketedState
-    AbstractReservationState <|-- CancellationRequestedState
     AbstractReservationState <|-- CancelledState
-    AbstractReservationState <|-- RefundRequestedState
-    AbstractReservationState <|-- RefundedState
-    Passenger <|-- SkypassMember
-    Passenger <|-- Guest
-    RefundPolicy <|.. FullRefundPolicy
-    RefundPolicy <|.. PartialRefundPolicy
-    RefundPolicy <|.. NoRefundPolicy
     Reservation o--> ReservationState : currentState
     Reservation "1" o--> "1..*" Passenger
     Reservation "1" o--> "0..*" Payment
-    Reservation "1" o--> "1" Itinerary
-    Itinerary "1" o--> "1..*" Segment
-    SkypassMember "1" --> "1" MileageAccount
-    Reservation --> FareRule
     BookingController --> AuthService
     BookingController --> FlightSearchService
     BookingController --> PaymentProcessor
     BookingController --> Reservation
     BookingController ..> ReservationUI
     PaymentProcessor --> PaymentGatewayInterface
-    RefundHandler ..> RefundPolicy
-    RefundHandler --> Reservation
-    GDSInterface --> FlightSchedule
+    PaymentProcessor --> Payment
+    PaymentProcessor --> FareRule
     FlightSearchService --> FlightSchedule
+    AuthService --> Member
 ```
 
-<span style="color:red">**1st iteration 범위.** 위 다이어그램의 타입과 주요 operation은 코드베이스에 존재한다. 다만 iteration 1에서 사용자 경로로 실제 실행되는 부분은 `AuthService`, `FlightSearchService`, `BookingController`, `PaymentProcessor`, `Reservation`, `Payment`, 그리고 State family의 `InitiatedState`, `PendingPaymentState`, `ConfirmedState` 중심 happy path다. `Itinerary`, `Segment`, `GDSInterface`, `RefundPolicy` family, 후반 취소·환불 상태 전이는 다이어그램 정합성을 위해 stub 또는 단순 전이로 존재하며, 본격 비즈니스 규칙은 iteration 2 이후에 채운다.</span>
+- <span style="color:red">Boundary는 `ReservationUI`와 `PaymentGatewayInterface`만 사용한다.</span>
+- <span style="color:red">Control은 `BookingController`, `AuthService`, `FlightSearchService`, `PaymentProcessor` 네 개로 제한된다.</span>
+- <span style="color:red">State 패턴은 `InitiatedState`, `PendingPaymentState`, `ConfirmedState`, 결제 실패용 `CancelledState`만 보여준다.</span>
+- <span style="color:red">후속 iteration용 `RefundPolicy`, `GDSInterface`, `Itinerary`, `Segment`, 관리자 클래스는 제외했다.</span>
 
 ### <span style="color:red">5.3 Sequence Diagram — Book Flight (Iteration 1 Happy Path)</span>
 
@@ -740,9 +540,9 @@ sequenceDiagram
     BC-->>UI: 확정 화면 (PNR)
 ```
 
-### <span style="color:red">5.4 State Diagram — Reservation</span>
+### <span style="color:red">5.4 State Diagram — Iteration 1 Reservation</span>
 
-<span style="color:red">Reservation의 생애주기는 8개 상태와 12개 전이로 구성된 유한 상태 기계다. `Cancelled`는 환불 불가 운임이면 종착 상태가 될 수 있고, 환불 가능 운임이면 `RefundRequested`로 이어진다. `Refunded`는 항상 종착 상태다. 아래 다이어그램은 `src/reservationState.acd`의 Amateras 상태도를 Mermaid로 옮긴 작업본이다.</span>
+<span style="color:red">Iteration 1 상태 다이어그램은 시연에서 실제로 확인하는 전이만 남긴다. 정상 경로는 `Initiated → PendingPayment → Confirmed`이고, 결제 실패 예외 경로만 `Cancelled`로 빠진다.</span>
 
 ```mermaid
 stateDiagram-v2
@@ -750,18 +550,14 @@ stateDiagram-v2
     Initiated --> PendingPayment : enterPassengerInfo (승객 정보 입력)
     PendingPayment --> Confirmed : processPayment (결제 성공)
     PendingPayment --> Cancelled : handlePaymentFailure (결제 실패)
-    Confirmed --> Ticketed : issueTicket (발권)
-    Confirmed --> CancellationRequested : requestCancellation (취소 요청)
-    Ticketed --> CancellationRequested : requestCancellation (취소 요청)
-    CancellationRequested --> Cancelled : confirmCancellation (취소 확정)
-    Cancelled --> RefundRequested : requestRefund (환불 요청)
-    Cancelled --> [*] : non-refundable fare
-    RefundRequested --> Refunded : processRefundDecision(true)
-    RefundRequested --> Cancelled : processRefundDecision(false)
-    Refunded --> [*]
+    Confirmed --> [*] : iteration 1 happy path 종료
+    Cancelled --> [*] : 결제 실패 종료
 ```
 
-<span style="color:red">**1st iteration 범위.** 실행 시나리오에서 검증하는 전이는 `Initiated → PendingPayment`와 `PendingPayment → Confirmed` 두 개이며, 결제 실패 경로에서는 `PendingPayment → Cancelled`도 동작한다. 후반 취소·발권·환불 전이는 다이어그램과 코드 정합성을 위해 단순 상태 전이로 구현되어 있으나, Ticket 생성, 좌석 해제, 환불 금액 산정, PG 환불 송금 같은 비즈니스 본문은 iteration 2 이후에 채운다.</span>
+- <span style="color:red">시연 핵심 전이는 `Initiated → PendingPayment`와 `PendingPayment → Confirmed` 두 개다.</span>
+- <span style="color:red">`PendingPayment → Cancelled`는 결제 실패 예외 경로로만 언급한다.</span>
+- <span style="color:red">발권, 취소 요청, 환불 요청, 환불 완료 상태는 iteration 1 다이어그램에서 제외한다.</span>
+- <span style="color:red">따라서 발표에서는 State 패턴이 if/else 없이 예약 상태를 바꾸는 구조에 집중한다.</span>
 
 ---
 
