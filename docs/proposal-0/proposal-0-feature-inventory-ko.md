@@ -331,22 +331,101 @@ flowchart LR
 
 <span style="color:red">**1st iteration 범위 (Walking Skeleton).** 현재 코드에서 end-to-end로 실행되는 범위는 `Login`, `Search Flights`, `Book Flight`, `Make Payment`의 happy path다. `Select Seat`, `Apply Mileage`, `Cancel Booking`, `View e-Ticket`, 관리자 환불 검토, GDS 환승 검색은 다이어그램에 먼저 고정한 설계 표면이며, 코드에는 컴파일 가능한 stub 또는 비활성 UI placeholder로 존재한다.</span>
 
-#### <span style="color:red">5.1.1 Actor별 Use Case 분해</span>
+#### <span style="color:red">5.1.1 Passenger Use Case</span>
 
-| <span style="color:red">Actor</span> | <span style="color:red">관련 Use Case</span> | <span style="color:red">발표 포인트</span> |
-| --- | --- | --- |
-| <span style="color:red">Passenger</span> | <span style="color:red">Search Flights<br/>Book Flight<br/>Book Multi-segment Trip<br/>View Booking<br/>Cancel Booking<br/>View e-Ticket</span> | <span style="color:red">예약의 기본 사용자다. 항공편 검색부터 예약, 조회, 취소, e-티켓 확인까지 전체 고객 여정을 수행한다.</span> |
-| <span style="color:red">Skypass Member</span> | <span style="color:red">Login<br/>Apply Mileage</span> | <span style="color:red">회원 전용 기능을 담당한다. 로그인 후 마일리지 적용이 가능하며, 외부 Skypass System 검증과 연결된다.</span> |
-| <span style="color:red">Guest</span> | <span style="color:red">Retrieve Booking by PNR</span> | <span style="color:red">비회원은 로그인하지 않는다. PNR 기반 조회를 통해 본인의 예약을 확인하고, include 관계로 View Booking과 Cancel Booking에 접근한다.</span> |
-| <span style="color:red">Admin</span> | <span style="color:red">Login<br/>Review Refund Request<br/>Manage Flight Schedule<br/>Update Flight Status<br/>Refund Denied</span> | <span style="color:red">관리자 흐름이다. 예외 환불 검토, 운항 스케줄 관리, 상태 업데이트처럼 일반 고객 흐름 밖의 운영 기능을 맡는다.</span> |
+```mermaid
+flowchart LR
+    Passenger((Passenger))
+    Search[Search Flights]
+    Book[Book Flight]
+    Multi[Book Multi-segment Trip]
+    Pay[Make Payment]
+    View[View Booking]
+    Cancel[Cancel Booking]
+    Ticket[View e-Ticket]
+    Seat[Select Seat]
+    GDS[(GDS)]
 
-#### <span style="color:red">5.1.2 외부 시스템 연결</span>
+    Passenger --- Search
+    Passenger --- Book
+    Passenger --- Multi
+    Passenger --- View
+    Passenger --- Cancel
+    Passenger --- Ticket
+    Book -. include .-> Pay
+    Multi -. include .-> Book
+    Seat -. extend .-> Book
+    Search -. extend .-> GDS
+```
 
-| <span style="color:red">External System</span> | <span style="color:red">연결 Use Case</span> | <span style="color:red">역할</span> |
-| --- | --- | --- |
-| <span style="color:red">Payment Gateway</span> | <span style="color:red">Make Payment</span> | <span style="color:red">결제 승인과 이후 환불 지급을 담당하는 외부 결제 시스템이다.</span> |
-| <span style="color:red">Skypass System</span> | <span style="color:red">Apply Mileage</span> | <span style="color:red">마일리지 잔액 검증과 차감을 담당한다.</span> |
-| <span style="color:red">GDS</span> | <span style="color:red">Search Interline Flights</span> | <span style="color:red">제휴 항공편 및 interline 환승 검색을 담당한다.</span> |
+- <span style="color:red">Passenger는 예약의 기본 사용자다.</span>
+- <span style="color:red">항공편 검색 → 예약 → 결제 → 조회 → 취소 → e-티켓 확인까지 전체 고객 여정을 수행한다.</span>
+- <span style="color:red">Iteration 1에서는 `Search Flights`, `Book Flight`, `Make Payment` happy path만 끝까지 실행된다.</span>
+- <span style="color:red">`Book Multi-segment Trip`, `Select Seat`, GDS 연동은 이후 iteration에서 확장된다.</span>
+
+#### <span style="color:red">5.1.2 Skypass Member Use Case</span>
+
+```mermaid
+flowchart LR
+    Member((Skypass Member))
+    Login[Login]
+    Apply[Apply Mileage]
+    Pay[Make Payment]
+    Skypass[(Skypass System)]
+
+    Member --- Login
+    Member --- Apply
+    Apply -. extend .-> Pay
+    Apply --- Skypass
+```
+
+- <span style="color:red">Skypass Member는 로그인 이후 회원 전용 기능을 사용할 수 있다.</span>
+- <span style="color:red">`Apply Mileage`는 결제 흐름을 확장하는 use case다.</span>
+- <span style="color:red">마일리지 잔액 조회와 차감은 외부 `Skypass System` 검증과 연결된다.</span>
+- <span style="color:red">Iteration 1에서는 로그인만 포함하고, 마일리지 적용은 iteration 3에서 구현한다.</span>
+
+#### <span style="color:red">5.1.3 Guest Use Case</span>
+
+```mermaid
+flowchart LR
+    Guest((Guest))
+    Retrieve[Retrieve Booking by PNR]
+    View[View Booking]
+    Cancel[Cancel Booking]
+
+    Guest --- Retrieve
+    Retrieve -. include .-> View
+    Retrieve -. include .-> Cancel
+```
+
+- <span style="color:red">Guest는 로그인하지 않는 비회원 사용자다.</span>
+- <span style="color:red">PNR 기반 조회를 통해 본인의 예약을 확인한다.</span>
+- <span style="color:red">검증이 끝난 뒤 `View Booking`과 `Cancel Booking`으로 이어진다.</span>
+- <span style="color:red">비회원 검증과 예약 조회는 iteration 2에서 본격 구현한다.</span>
+
+#### <span style="color:red">5.1.4 Admin Use Case</span>
+
+```mermaid
+flowchart LR
+    Admin((Admin))
+    Login[Login]
+    Review[Review Refund Request]
+    Denied[Refund Denied]
+    Manage[Manage Flight Schedule]
+    Update[Update Flight Status]
+
+    Admin --- Login
+    Admin --- Review
+    Admin --- Manage
+    Admin --- Update
+    Admin --- Denied
+    Denied -. extend .-> Review
+```
+
+- <span style="color:red">Admin은 일반 고객 흐름 밖의 운영 기능을 담당한다.</span>
+- <span style="color:red">예외 환불 요청을 검토하고, 필요하면 환불 거절 흐름으로 이어진다.</span>
+- <span style="color:red">운항 스케줄 관리와 항공편 상태 업데이트를 수행한다.</span>
+- <span style="color:red">관리자 기능은 final polish에 가까우므로 iteration 4에 배치한다.</span>
 
 ### <span style="color:red">5.2 Class Diagram (ECB)</span>
 
