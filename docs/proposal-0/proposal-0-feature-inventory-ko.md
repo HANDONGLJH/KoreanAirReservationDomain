@@ -536,23 +536,17 @@ classDiagram
 ```mermaid
 sequenceDiagram
     actor 사용자
-
-    box Boundary #E3F2FD
-        participant UI as ReservationUI
-    end box
-
-    box Control #FFF3E0
-        participant BC as BookingController
-        participant FSS as FlightSearchService
-        participant PP as PaymentProcessor
-    end box
-
-    box Entity #E8F5E9
-        participant R as Reservation
-        participant S as ReservationState
-    end box
-
+    participant UI as ReservationUI
+    participant BC as BookingController
+    participant FSS as FlightSearchService
+    participant PP as PaymentProcessor
+    participant R as Reservation
+    participant S as ReservationState
     participant PG as PaymentGatewayInterface
+
+    Note over UI: Boundary
+    Note over BC,PP: Control
+    Note over R,S: Entity
 
     사용자->>UI: 검색 조건 입력 (출발지, 도착지, 일자)
     UI->>BC: processSearch(from, to, date)
