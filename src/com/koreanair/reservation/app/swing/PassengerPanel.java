@@ -1,19 +1,19 @@
 package com.koreanair.reservation.app.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import com.koreanair.reservation.control.BookingController;
 import com.koreanair.reservation.domain.flight.FlightSchedule;
@@ -22,22 +22,14 @@ import com.koreanair.reservation.domain.passenger.PassengerType;
 import com.koreanair.reservation.domain.reservation.Reservation;
 import com.koreanair.reservation.domain.user.Member;
 
-/**
- * 3단계 승객 정보 입력 화면.
- *
- * <p>이 화면 진입 시점에 {@link BookingController#initiateBooking(FlightSchedule)} 로 Reservation 을
- * 생성(Initiated)하고, "다음" 버튼 클릭 시 {@code setPassengerInfo} 를 호출해
- * Initiated → PendingPayment 전이를 유도한다. 입력값은 실제 Passenger 엔티티로 만들어 Reservation 에 저장한다.
- */
 public class PassengerPanel extends JPanel {
 
     private final JTextField nameField = new JTextField(20);
     private final JTextField passportField = new JTextField(20);
     private final JTextField birthField = new JTextField(20);
-
-    private final JLabel selectedFlightLabel = new JLabel(" ");
-    private final JButton nextButton = new JButton("다음");
-    private final JButton backButton = new JButton("뒤로");
+    private final JLabel flightInfoLabel = new JLabel(" ");
+    private final JButton nextButton = new JButton("다음 단계 →");
+    private final JButton backButton = new JButton("← 뒤로");
 
     private final MainFrame frame;
     private final BookingController booking;
@@ -52,55 +44,95 @@ public class PassengerPanel extends JPanel {
         this.frame = frame;
         this.booking = booking;
         this.ui = ui;
+        setBackground(ModernUI.BACKGROUND);
 
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBorder(BorderFactory.createEmptyBorder(24, 60, 24, 60));
+        buildContent();
+    }
+
+    private void buildContent() {
+        JPanel card = new JPanel(new GridBagLayout());
+        ModernUI.styleCard(card);
         GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(6, 6, 6, 6);
+        c.insets = new Insets(8, 8, 8, 8);
+        c.fill = GridBagConstraints.HORIZONTAL;
         c.anchor = GridBagConstraints.WEST;
 
-        JLabel title = new JLabel("승객 정보 입력");
-        title.setFont(title.getFont().deriveFont(18f));
+        JLabel stepLabel = new JLabel("STEP 2");
+        stepLabel.setFont(ModernUI.FONT_SMALL);
+        stepLabel.setForeground(ModernUI.PRIMARY);
+        stepLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
         c.gridx = 0; c.gridy = 0; c.gridwidth = 2;
-        form.add(title, c);
+        card.add(stepLabel, c);
+
+        JLabel title = new JLabel("승객 정보 입력");
+        title.setFont(ModernUI.FONT_HEADING);
+        title.setForeground(ModernUI.TEXT_PRIMARY);
+        c.gridy = 1;
+        card.add(title, c);
+
+        JLabel flightLabel = new JLabel("선택 항공편");
+        flightLabel.setFont(ModernUI.FONT_SMALL);
+        flightLabel.setForeground(ModernUI.TEXT_SECONDARY);
+        c.gridy = 2; c.gridx = 0; c.gridwidth = 1;
+        card.add(flightLabel, c);
+        c.gridx = 1;
+        flightInfoLabel.setFont(ModernUI.FONT_BODY);
+        flightInfoLabel.setForeground(ModernUI.PRIMARY);
+        card.add(flightInfoLabel, c);
 
         c.gridwidth = 1;
-        c.gridy = 1; c.gridx = 0; form.add(new JLabel("선택 항공편"), c);
-        c.gridx = 1; form.add(selectedFlightLabel, c);
+        c.gridy = 3; c.gridx = 0;
+        card.add(new JLabel("이름 (Name)"), c);
+        c.gridx = 1;
+        ModernUI.styleTextField(nameField);
+        card.add(nameField, c);
 
-        c.gridy = 2; c.gridx = 0; form.add(new JLabel("이름"), c);
-        c.gridx = 1; form.add(nameField, c);
+        c.gridy = 4; c.gridx = 0;
+        card.add(new JLabel("여권번호 (Passport)"), c);
+        c.gridx = 1;
+        ModernUI.styleTextField(passportField);
+        card.add(passportField, c);
 
-        c.gridy = 3; c.gridx = 0; form.add(new JLabel("여권번호"), c);
-        c.gridx = 1; form.add(passportField, c);
+        c.gridy = 5; c.gridx = 0;
+        card.add(new JLabel("생년월일 (YYYY-MM-DD)"), c);
+        c.gridx = 1;
+        ModernUI.styleTextField(birthField);
+        card.add(birthField, c);
 
-        c.gridy = 4; c.gridx = 0; form.add(new JLabel("생년월일 (YYYY-MM-DD)"), c);
-        c.gridx = 1; form.add(birthField, c);
+        JPanel centerWrap = new JPanel(new GridBagLayout());
+        centerWrap.setBackground(ModernUI.BACKGROUND);
+        c.gridx = 0; c.gridy = 0;
+        centerWrap.add(card, c);
 
-        add(form, BorderLayout.CENTER);
+        add(centerWrap, BorderLayout.CENTER);
 
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footer.setBorder(BorderFactory.createEmptyBorder(4, 10, 14, 10));
-        backButton.setPreferredSize(new Dimension(120, 34));
-        nextButton.setPreferredSize(new Dimension(120, 34));
-        footer.add(backButton);
-        footer.add(nextButton);
+        JPanel footer = new JPanel(new BorderLayout());
+        footer.setBackground(ModernUI.CARD_BG);
+        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, ModernUI.BORDER));
+
+        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 8));
+        rightBtns.setBackground(ModernUI.CARD_BG);
+
+        ModernUI.styleButtonSecondary(backButton);
+        rightBtns.add(backButton);
+
+        ModernUI.styleButton(nextButton);
+        rightBtns.add(nextButton);
+
+        footer.add(rightBtns, BorderLayout.EAST);
+        footer.setPreferredSize(new Dimension(0, 54));
         add(footer, BorderLayout.SOUTH);
 
         backButton.addActionListener(e -> frame.showSearch());
         nextButton.addActionListener(e -> doNext());
     }
 
-    /**
-     * 검색 화면에서 항공편 선택 시 호출. Reservation 을 즉시 생성하여 State=Initiated 로 보여준다.
-     */
     public void prepare(FlightSchedule selected, Member me) {
         this.selected = selected;
         this.member = me;
         Object[] row = SwingReservationUI.toTableRow(1, selected);
-        selectedFlightLabel.setText(String.format("%s (%s → %s)", row[1], row[3], row[4]));
+        flightInfoLabel.setText(String.format("%s (%s → %s)", row[1], row[3], row[4]));
 
-        // Reservation 생성 — State: Initiated
         this.reservation = booking.initiateBooking(selected);
         if (reservation != null && me != null) {
             reservation.setRequester(me);
@@ -113,33 +145,27 @@ public class PassengerPanel extends JPanel {
 
     private void doNext() {
         if (reservation == null) {
-            ui.displayError("예약이 생성되지 않았습니다. 검색 화면으로 돌아가 재시도하세요.");
+            ui.displayError("예약이 생성되지 않았습니다.");
             return;
         }
         if (nameField.getText().trim().isEmpty()) {
             ui.displayError("승객 이름을 입력하세요.");
             return;
         }
-        LocalDate birthDate;
         try {
-            birthDate = LocalDate.parse(birthField.getText().trim());
-        } catch (DateTimeParseException ex) {
-            ui.displayError("생년월일 형식이 올바르지 않습니다. 예: 1999-01-31");
-            return;
-        }
-        Passenger passenger;
-        try {
-            passenger = Passenger.create(
+            java.time.LocalDate birthDate = java.time.LocalDate.parse(birthField.getText().trim());
+            Passenger passenger = Passenger.create(
                     nameField.getText().trim(),
                     member != null ? member.getEmail() : null,
                     passportField.getText().trim(),
                     birthDate,
                     PassengerType.ADULT);
+            booking.setPassengerInfo(reservation, passenger);
+            frame.onPassengerInfoEntered(reservation);
+        } catch (java.time.format.DateTimeParseException ex) {
+            ui.displayError("생년월일 형식이 올바르지 않습니다. 예: 1999-01-31");
         } catch (IllegalArgumentException ex) {
             ui.displayError(ex.getMessage());
-            return;
         }
-        booking.setPassengerInfo(reservation, passenger);
-        frame.onPassengerInfoEntered(reservation);
     }
 }

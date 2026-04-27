@@ -1,8 +1,10 @@
 package com.koreanair.reservation.app.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -11,23 +13,17 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import com.koreanair.reservation.domain.payment.Payment;
 import com.koreanair.reservation.domain.reservation.Reservation;
 
-/**
- * 5단계 예약 확정 화면. PNR·상태·결제 금액을 표시한 뒤 "처음으로" 클릭 시 로그인 화면으로 복귀.
- *
- * <p>State 패턴 시연의 종착지 — 이 화면 진입 시점에 Reservation.currentState 가 Confirmed 여야 하며,
- * 상단 {@link StateBadge} 가 "Confirmed" 를 강조 표시하고 있어야 한다.
- */
 public class ConfirmationPanel extends JPanel {
 
     private final JLabel pnrLabel = new JLabel(" ");
     private final JLabel stateLabel = new JLabel(" ");
     private final JLabel amountLabel = new JLabel(" ");
     private final JLabel paymentStatusLabel = new JLabel(" ");
-
     private final JButton homeButton = new JButton("처음으로");
     private final JButton ticketButton = new JButton("e-Ticket 발급 (Iteration 2 예정)");
 
@@ -36,44 +32,108 @@ public class ConfirmationPanel extends JPanel {
     public ConfirmationPanel(MainFrame frame) {
         super(new BorderLayout());
         this.frame = frame;
+        setBackground(ModernUI.BACKGROUND);
 
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBorder(BorderFactory.createEmptyBorder(40, 80, 40, 80));
+        buildContent();
+    }
+
+    private void buildContent() {
+        JPanel card = new JPanel(new GridBagLayout());
+        ModernUI.styleCard(card);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(ModernUI.SUCCESS, 2),
+                BorderFactory.createEmptyBorder(32, 40, 32, 40)));
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(10, 10, 10, 10);
+        c.fill = GridBagConstraints.HORIZONTAL;
         c.anchor = GridBagConstraints.WEST;
 
-        JLabel title = new JLabel("예약 확정");
-        title.setFont(title.getFont().deriveFont(22f));
+        JLabel checkmark = new JLabel("✓", SwingConstants.CENTER);
+        checkmark.setFont(new Font("System", Font.BOLD, 48));
+        checkmark.setForeground(ModernUI.SUCCESS);
+        checkmark.setPreferredSize(new Dimension(80, 80));
         c.gridx = 0; c.gridy = 0; c.gridwidth = 2;
-        form.add(title, c);
+        card.add(checkmark, c);
+
+        JLabel title = new JLabel("예약 확정");
+        title.setFont(ModernUI.FONT_TITLE);
+        title.setForeground(ModernUI.TEXT_PRIMARY);
+        c.gridy = 1;
+        card.add(title, c);
+
+        JLabel subtitle = new JLabel("예약이 성공적으로 완료되었습니다.");
+        subtitle.setFont(ModernUI.FONT_BODY);
+        subtitle.setForeground(ModernUI.TEXT_SECONDARY);
+        c.gridy = 2;
+        card.add(subtitle, c);
+
         c.gridwidth = 1;
+        c.gridy = 3; c.gridx = 0;
+        JLabel pnrH = new JLabel("예약 번호 (PNR)");
+        pnrH.setFont(ModernUI.FONT_SMALL);
+        pnrH.setForeground(ModernUI.TEXT_SECONDARY);
+        card.add(pnrH, c);
+        c.gridx = 1;
+        pnrLabel.setFont(new Font("Monaco", Font.PLAIN, 16));
+        pnrLabel.setForeground(ModernUI.PRIMARY);
+        card.add(pnrLabel, c);
 
-        c.gridy = 1; c.gridx = 0; form.add(new JLabel("PNR"), c);
-        pnrLabel.setFont(pnrLabel.getFont().deriveFont(16f));
-        c.gridx = 1; form.add(pnrLabel, c);
+        c.gridy = 4; c.gridx = 0;
+        JLabel stateH = new JLabel("예약 상태");
+        stateH.setFont(ModernUI.FONT_SMALL);
+        stateH.setForeground(ModernUI.TEXT_SECONDARY);
+        card.add(stateH, c);
+        c.gridx = 1;
+        stateLabel.setFont(ModernUI.FONT_BODY);
+        stateLabel.setForeground(ModernUI.SUCCESS);
+        card.add(stateLabel, c);
 
-        c.gridy = 2; c.gridx = 0; form.add(new JLabel("예약 상태"), c);
-        stateLabel.setFont(stateLabel.getFont().deriveFont(16f));
-        c.gridx = 1; form.add(stateLabel, c);
+        c.gridy = 5; c.gridx = 0;
+        JLabel payH = new JLabel("결제 상태");
+        payH.setFont(ModernUI.FONT_SMALL);
+        payH.setForeground(ModernUI.TEXT_SECONDARY);
+        card.add(payH, c);
+        c.gridx = 1;
+        paymentStatusLabel.setFont(ModernUI.FONT_BODY);
+        paymentStatusLabel.setForeground(ModernUI.TEXT_PRIMARY);
+        card.add(paymentStatusLabel, c);
 
-        c.gridy = 3; c.gridx = 0; form.add(new JLabel("결제 상태"), c);
-        c.gridx = 1; form.add(paymentStatusLabel, c);
+        c.gridy = 6; c.gridx = 0;
+        JLabel amtH = new JLabel("결제 금액");
+        amtH.setFont(ModernUI.FONT_SMALL);
+        amtH.setForeground(ModernUI.TEXT_SECONDARY);
+        card.add(amtH, c);
+        c.gridx = 1;
+        amountLabel.setFont(ModernUI.FONT_HEADING);
+        amountLabel.setForeground(ModernUI.TEXT_PRIMARY);
+        card.add(amountLabel, c);
 
-        c.gridy = 4; c.gridx = 0; form.add(new JLabel("결제 금액"), c);
-        c.gridx = 1; form.add(amountLabel, c);
+        JPanel centerWrap = new JPanel(new GridBagLayout());
+        centerWrap.setBackground(ModernUI.BACKGROUND);
+        c.gridx = 0; c.gridy = 0;
+        centerWrap.add(card, c);
 
-        add(form, BorderLayout.CENTER);
+        add(centerWrap, BorderLayout.CENTER);
 
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        footer.setBorder(BorderFactory.createEmptyBorder(4, 10, 14, 10));
+        JPanel footer = new JPanel(new BorderLayout());
+        footer.setBackground(ModernUI.CARD_BG);
+        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, ModernUI.BORDER));
+
+        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 8));
+        rightBtns.setBackground(ModernUI.CARD_BG);
+
         ticketButton.setEnabled(false);
-        homeButton.setPreferredSize(new Dimension(140, 36));
-        footer.add(ticketButton);
-        footer.add(homeButton);
-        add(footer, BorderLayout.SOUTH);
+        ticketButton.setFont(ModernUI.FONT_SMALL);
+        ticketButton.setForeground(ModernUI.TEXT_SECONDARY);
+        rightBtns.add(ticketButton);
 
+        ModernUI.styleButton(homeButton);
         homeButton.addActionListener(e -> frame.reset());
+        rightBtns.add(homeButton);
+
+        footer.add(rightBtns, BorderLayout.EAST);
+        footer.setPreferredSize(new Dimension(0, 54));
+        add(footer, BorderLayout.SOUTH);
     }
 
     public void prepare(Reservation reservation, Payment payment) {

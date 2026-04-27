@@ -2,10 +2,16 @@ package com.koreanair.reservation.app.swing;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import com.koreanair.reservation.app.sample.SampleData;
 import com.koreanair.reservation.app.sample.SampleData.SeedResult;
@@ -18,14 +24,6 @@ import com.koreanair.reservation.domain.payment.Payment;
 import com.koreanair.reservation.domain.reservation.Reservation;
 import com.koreanair.reservation.domain.user.Member;
 
-/**
- * Swing GUI 의 최상위 컨테이너. CardLayout 으로 5개 패널을 교체하며,
- * 상단에는 현재 Reservation State 를 강조 표시하는 {@link StateBadge} 를 고정 배치한다.
- *
- * <p>패널 간 전이는 모두 이 클래스의 콜백(onXxx) 메서드를 통해 이루어진다.
- * 각 패널은 자신의 입력 검증과 Control 호출만 담당하고, 다음 화면 이동은
- * MainFrame 에 위임하여 결합도를 낮춘다.
- */
 public class MainFrame extends JFrame {
 
     private static final String CARD_LOGIN = "login";
@@ -37,22 +35,20 @@ public class MainFrame extends JFrame {
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel cards = new JPanel(cardLayout);
     private final StateBadge stateBadge = new StateBadge();
+    private final JPanel headerPanel = new JPanel(new BorderLayout());
 
-    // --- Control / Boundary 의존성 (SwingApp 에서 주입) ---
     private final AuthService authService;
     private final FlightSearchService flightSearch;
     private final BookingController booking;
     private final SwingReservationUI ui;
     private final SeedResult seed;
 
-    // --- 패널 ---
     private final LoginPanel loginPanel;
     private final SearchPanel searchPanel;
     private final PassengerPanel passengerPanel;
     private final PaymentPanel paymentPanel;
     private final ConfirmationPanel confirmationPanel;
 
-    // --- 세션 상태 ---
     private Member loggedInMember;
     @SuppressWarnings("unused")
     private Reservation currentReservation;
@@ -63,19 +59,19 @@ public class MainFrame extends JFrame {
                      BookingController booking,
                      SwingReservationUI ui,
                      SeedResult seed) {
-        super("대한항공 예약 시스템 — Iteration 1 (Swing)");
+        super("대한항공 예약 시스템");
         this.authService = authService;
         this.flightSearch = flightSearch;
         this.booking = booking;
         this.ui = ui;
         this.seed = seed;
 
-        // 레이아웃: 상단 StateBadge + 중앙 CardLayout
         setLayout(new BorderLayout());
-        add(stateBadge, BorderLayout.NORTH);
+
+        buildHeader();
+        add(headerPanel, BorderLayout.NORTH);
         add(cards, BorderLayout.CENTER);
 
-        // 패널 초기화 — MainFrame 참조를 넘겨 콜백 연결.
         loginPanel = new LoginPanel(this, authService, ui);
         searchPanel = new SearchPanel(this, booking, ui);
         passengerPanel = new PassengerPanel(this, booking, ui);
@@ -92,12 +88,47 @@ public class MainFrame extends JFrame {
         ui.setParent(this);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(760, 520));
+        setPreferredSize(new Dimension(900, 640));
         pack();
         setLocationRelativeTo(null);
     }
 
-    // --- 화면 전환 헬퍼 ---
+    private void buildHeader() {
+        headerPanel.setBackground(ModernUI.PRIMARY);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
+        leftPanel.setBackground(ModernUI.PRIMARY);
+        leftPanel.setBorder(BorderFactory.createEmptyBorder(14, 24, 14, 0));
+
+        JLabel logo = new JLabel("✈", SwingConstants.CENTER);
+        logo.setFont(new Font("System", Font.PLAIN, 26));
+        logo.setForeground(Color.WHITE);
+
+        JLabel title = new JLabel("대한항공");
+        title.setFont(new Font("System", Font.BOLD, 18));
+        title.setForeground(Color.WHITE);
+
+        JLabel subtitle = new JLabel("항공 예약");
+        subtitle.setFont(new Font("System", Font.PLAIN, 13));
+        subtitle.setForeground(new Color(0xCC, 0xE4, 0xFF));
+
+        leftPanel.add(logo);
+        leftPanel.add(title);
+        leftPanel.add(subtitle);
+
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 16, 0));
+        rightPanel.setBackground(ModernUI.PRIMARY);
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 20));
+
+        JPanel badgeWrapper = new JPanel(new BorderLayout());
+        badgeWrapper.setBackground(ModernUI.PRIMARY);
+        badgeWrapper.add(stateBadge, BorderLayout.NORTH);
+        rightPanel.add(badgeWrapper);
+
+        headerPanel.add(leftPanel, BorderLayout.WEST);
+        headerPanel.add(rightPanel, BorderLayout.EAST);
+    }
 
     public void showLogin() { cardLayout.show(cards, CARD_LOGIN); }
     public void showSearch() { cardLayout.show(cards, CARD_SEARCH); }
@@ -105,11 +136,9 @@ public class MainFrame extends JFrame {
     public void showPayment() { cardLayout.show(cards, CARD_PAYMENT); }
     public void showConfirmation() { cardLayout.show(cards, CARD_CONFIRMATION); }
 
-    // --- 콜백: 각 패널이 다음 단계 진입을 요청할 때 호출 ---
-
     public void onLoginSuccess(Member m) {
         this.loggedInMember = m;
-        stateBadge.reset();   // 아직 Reservation 없음
+        stateBadge.reset();
         showSearch();
     }
 
@@ -118,13 +147,11 @@ public class MainFrame extends JFrame {
         showPassenger();
     }
 
-    /** PassengerPanel 에서 Reservation 이 새로 만들어진 직후 호출 (State: Initiated). */
     public void onReservationCreated(Reservation reservation) {
         this.currentReservation = reservation;
         if (reservation != null) stateBadge.setCurrentState(reservation.getStateName());
     }
 
-    /** 승객 정보 입력 완료 — State: Initiated → PendingPayment. */
     public void onPassengerInfoEntered(Reservation reservation) {
         this.currentReservation = reservation;
         if (reservation != null) stateBadge.setCurrentState(reservation.getStateName());
@@ -132,7 +159,6 @@ public class MainFrame extends JFrame {
         showPayment();
     }
 
-    /** 결제 성공 — State: PendingPayment → Confirmed. */
     public void onPaymentConfirmed(Reservation reservation, Payment payment) {
         this.currentReservation = reservation;
         if (reservation != null) stateBadge.setCurrentState(reservation.getStateName());
@@ -140,7 +166,6 @@ public class MainFrame extends JFrame {
         showConfirmation();
     }
 
-    /** 확정 화면의 "처음으로" 클릭 — 새 AuthService session 을 유지한 채 로그인 화면부터 재시작. */
     public void reset() {
         this.currentReservation = null;
         this.loggedInMember = null;
@@ -149,8 +174,6 @@ public class MainFrame extends JFrame {
         showLogin();
         loginPanel.focusFirst();
     }
-
-    // --- Iteration 1 편의: seed / flightSearch 노출 (테스트·확장 시 참조) ---
 
     public SeedResult seed() { return seed; }
     public FlightSearchService flightSearch() { return flightSearch; }
