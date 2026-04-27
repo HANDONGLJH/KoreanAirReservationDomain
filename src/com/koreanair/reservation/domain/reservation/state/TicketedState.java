@@ -1,5 +1,8 @@
 package com.koreanair.reservation.domain.reservation.state;
 
+import com.koreanair.reservation.domain.reservation.Reservation;
+import com.koreanair.reservation.domain.reservation.ReservationStatus;
+
 /**
  * 발권 완료 상태 — Iteration 1 스텁.
  *
@@ -15,6 +18,9 @@ public class TicketedState extends AbstractReservationState {
         return "Ticketed";
     }
 
-    // TODO(iter2): requestCancellation(Reservation ctx) override 구현.
-    //              AbstractReservationState 의 디폴트가 InvalidStateTransitionException 을 던진다.
+    @Override
+    public void requestCancellation(Reservation ctx) {
+        ctx.setState(new CancellationRequestedState());
+        ctx.updateStatus(ReservationStatus.CANCELLATION_REQUESTED);
+    }
 }

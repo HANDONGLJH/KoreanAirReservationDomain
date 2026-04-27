@@ -18,8 +18,16 @@ public class Flight {
         return flightNumber;
     }
 
+    public void setFlightNumber(String flightNumber) {
+        this.flightNumber = flightNumber;
+    }
+
     public Route getRoute() {
         return route;
+    }
+
+    public void setRoute(Route route) {
+        this.route = route;
     }
 
     public List<Fare> getFares() {

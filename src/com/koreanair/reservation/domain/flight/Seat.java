@@ -25,8 +25,16 @@ public class Seat {
         this.status = SeatStatus.HELD;
     }
 
+    public void hold(int timeoutMinutes) {
+        hold();
+    }
+
     public void updateStatus(SeatStatus newStatus) {
         this.status = newStatus;
+    }
+
+    public void updateStatus(String newStatus) {
+        this.status = SeatStatus.valueOf(newStatus);
     }
 
     public void release() {

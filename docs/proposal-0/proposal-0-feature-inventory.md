@@ -37,7 +37,7 @@ language: en
 
 ### <span style="color:red">1.2 Source Baseline</span>
 
-<span style="color:red">The implementation lives in the Eclipse Java project at `KoreanAirReservationDomain`. As of this submission, the project contains 69 Java source files organised into eleven packages (described in detail in 6.2). The four UML diagrams in 5 are not hand-drawn: they are emitted programmatically from this source tree by the AmaterasUML emitter classes under `com.koreanair.reservation.tools` — `GenerateUseCaseDiagram`, `GenerateClassDiagram`, `GenerateSequenceDiagrams`, and `GenerateStateDiagrams` — which write AmaterasUML XML files into the Eclipse workspace; those files are then opened in Eclipse and exported as PNG images for the printed deliverable.</span>
+<span style="color:red">The implementation lives in the Eclipse Java project at `KoreanAirReservationDomain`. As of this submission, the project contains 78 Java source files organised into eleven packages (described in detail in 6.2). The four UML diagrams in 5 are not hand-drawn: they are emitted programmatically from this source tree by the AmaterasUML emitter classes under `com.koreanair.reservation.tools` — `GenerateUseCaseDiagram`, `GenerateClassDiagram`, `GenerateSequenceDiagrams`, and `GenerateStateDiagrams` — which write AmaterasUML XML files into the Eclipse workspace; those files are then opened in Eclipse and exported as PNG images for the printed deliverable.</span>
 
 <span style="color:red">The reason for generating diagrams from source rather than drawing them is a practical one. Across iterations the design will change repeatedly, and any change to the class diagram cascades into the sequence diagrams (whose participants must remain consistent with their class methods) and the state diagrams (whose transitions must remain backed by methods on the corresponding entity). Hand-editing four diagrams every time a class signature shifts is both slow and error-prone. With the emitter pattern, a single source change is amplified into all dependent diagrams in one rebuild — closer to "compiling documentation" than to "drawing pictures".</span>
 
@@ -443,7 +443,7 @@ sequenceDiagram
 
 ### <span style="color:red">5.4 State Diagram — Reservation</span>
 
-<span style="color:red">The Reservation lifecycle is a finite state machine with eight states and ten transitions. Two states are terminal: `Cancelled` and `Refunded`. The diagram below uses the convention `current → next : event`, where `event` names the method on `Reservation` that triggers the transition.</span>
+<span style="color:red">The Reservation lifecycle is a finite state machine with eight states and twelve transitions. `Cancelled` can be terminal for non-refundable fares or can continue to `RefundRequested`; `Refunded` is always terminal. The diagram below mirrors the Amateras state diagram in `src/reservationState.acd`.</span>
 
 ```mermaid
 stateDiagram-v2
@@ -455,13 +455,14 @@ stateDiagram-v2
     Confirmed --> CancellationRequested : requestCancellation
     Ticketed --> CancellationRequested : requestCancellation
     CancellationRequested --> Cancelled : confirmCancellation
-    CancellationRequested --> RefundRequested : requestRefund
-    RefundRequested --> Refunded : processRefundDecision (approved)
+    Cancelled --> RefundRequested : requestRefund
+    Cancelled --> [*] : non-refundable fare
+    RefundRequested --> Refunded : processRefundDecision(true)
+    RefundRequested --> Cancelled : processRefundDecision(false)
     Refunded --> [*]
-    Cancelled --> [*]
 ```
 
-<span style="color:red">**1st-iteration scope.** Three transitions execute end-to-end in iteration 1: `Initiated → PendingPayment` via `enterPassengerInfo`, `PendingPayment → Confirmed` via `processPayment` on success, and `PendingPayment → Cancelled` via `handlePaymentFailure`. The remaining seven transitions are declared in the corresponding `*State` classes but their bodies are placeholders carrying `TODO(iter2)` or `TODO(iter3)` markers; iteration 2 brings them online together with the Strategy refund family.</span>
+<span style="color:red">**1st-iteration scope.** The executable demo verifies `Initiated → PendingPayment` and `PendingPayment → Confirmed`; the payment-failure branch also supports `PendingPayment → Cancelled`. Later ticketing, cancellation, and refund transitions now exist as simple state transitions to match the diagram, while ticket allocation, seat release, refund calculation, and gateway disbursement remain iteration-2 work.</span>
 
 ---
 
@@ -516,7 +517,7 @@ stateDiagram-v2
 - **`PendingPaymentState`** overrides `processPayment(ctx)` to set state to `ConfirmedState`, and `handlePaymentFailure(ctx)` to set state to `CancelledState`.
 - **`ConfirmedState`** overrides `issueTicket(ctx)` to set state to `TicketedState`, and `requestCancellation(ctx)` to set state to `CancellationRequestedState`. The transitions themselves work in iteration 1; the bodies that allocate a `Ticket` and call `RefundHandler` respectively are deferred to iteration 2.</span>
 
-<span style="color:red">The other five (`TicketedState`, `CancellationRequestedState`, `CancelledState`, `RefundRequestedState`, `RefundedState`) are present as declarations only; their bodies are filled in iterations 2–4, except for `RefundedState`, which is a final state and rejects all transitions by inheriting `AbstractReservationState`'s defaults.</span>
+<span style="color:red">The other five (`TicketedState`, `CancellationRequestedState`, `CancelledState`, `RefundRequestedState`, `RefundedState`) are present to keep the code aligned with the state diagram. Four of them contain simple transition bodies; `RefundedState` is final and rejects all transitions by inheriting `AbstractReservationState`'s defaults.</span>
 
 <span style="color:red">**Why the legacy enum survives.** The earlier design used a `ReservationStatus` enum on Reservation, and several existing methods (and any future reporting query) read it. Rather than break those callers, every state-transition method on the concrete states also calls `ctx.updateStatus(ReservationStatus.X)` so that the enum stays in sync. The State pattern thus becomes the source of truth for transitions, while the enum remains a read-only view that legacy code can inspect. The `Reservation` Javadoc records this as a deliberate compatibility decision rather than as a duplication to clean up.</span>
 
@@ -542,7 +543,8 @@ stateDiagram-v2
 <span style="color:red">- **`FlightSearchService.search(...)` ignores its parameters** and returns the entire in-memory catalogue. The reason is that `FlightSchedule`'s departure-time and route getters return placeholder values at this point; filtering would silently drop every record. Iteration 2 wires the getters and replaces the body with a real predicate.
 - **`AuthService.login(...)` accepts any password string.** The current implementation looks the member up by Skypass number and returns it without verifying the password. Iteration 2 introduces salted-hash verification and converts failed logins into an exception rather than a `null` return.
 - **`ConfirmedState.issueTicket(...)` and `ConfirmedState.requestCancellation(...)` perform the state transition but have empty bodies.** No `Ticket` is created and no `RefundHandler` call is made. This is the price of keeping iteration 1 focused on the State pattern alone; iteration 2 fills the bodies and connects them to the Strategy refund family.
-- **`RefundHandler`, `RefundPolicy`, observers, the `AppConfig` singleton, and `ItineraryFactory` are not yet present.** They appear in iterations 2 (Strategy), 3 (Observer), and 4 (Singleton, Factory Method) respectively, in line with the roadmap above.</span>
+- **`RefundPolicy`, `GDSInterface`, `Itinerary`, `Segment`, `SkypassMember`, and `Guest` are currently design stubs.** They exist so the implementation matches the Amateras diagrams, while their business behaviour is filled in later iterations.
+- **Observers, the `AppConfig` singleton, and `ItineraryFactory` are not yet present.** They appear in iterations 3 (Observer) and 4 (Singleton, Factory Method), in line with the roadmap above.</span>
 
 ### <span style="color:red">6.6 Next-Iteration Outlook</span>
 

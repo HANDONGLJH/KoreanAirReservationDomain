@@ -14,6 +14,14 @@ public class AircraftType {
         return aircraftTypeCode;
     }
 
+    public String getTypeCode() {
+        return aircraftTypeCode;
+    }
+
+    public String getModelName() {
+        return modelName;
+    }
+
     public List<Seat> getSeatLayout() {
         return seatLayout;
     }

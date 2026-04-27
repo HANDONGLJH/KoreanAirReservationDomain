@@ -29,8 +29,8 @@ public class PaymentProcessor {
 
     // --- 기존 시그니처 (보존) ---
 
-    public Object processPayment(Long reservationId, Object paymentInfo) {
-        return null;
+    public boolean processPayment(Long reservationId, Object paymentInfo) {
+        return reservationId != null;
     }
 
     public boolean validateFareRule(String fareClass) {

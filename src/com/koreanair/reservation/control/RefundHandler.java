@@ -4,6 +4,11 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.koreanair.reservation.domain.payment.RefundRequest;
+import com.koreanair.reservation.domain.flight.FareRule;
+import com.koreanair.reservation.domain.payment.FullRefundPolicy;
+import com.koreanair.reservation.domain.payment.NoRefundPolicy;
+import com.koreanair.reservation.domain.payment.PartialRefundPolicy;
+import com.koreanair.reservation.domain.payment.RefundPolicy;
 
 public class RefundHandler {
 
@@ -23,5 +28,16 @@ public class RefundHandler {
 
     public List<RefundRequest> getPendingRequests() {
         return null;
+    }
+
+    private RefundPolicy resolvePolicy(FareRule fareRule) {
+        if (fareRule == null || !fareRule.isRefundable()) {
+            return new NoRefundPolicy();
+        }
+        String fareClass = fareRule.getFareClass();
+        if ("Y".equals(fareClass) || "B".equals(fareClass)) {
+            return new FullRefundPolicy();
+        }
+        return new PartialRefundPolicy();
     }
 }

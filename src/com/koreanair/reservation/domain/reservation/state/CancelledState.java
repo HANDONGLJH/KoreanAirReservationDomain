@@ -1,5 +1,8 @@
 package com.koreanair.reservation.domain.reservation.state;
 
+import com.koreanair.reservation.domain.reservation.Reservation;
+import com.koreanair.reservation.domain.reservation.ReservationStatus;
+
 /**
  * 취소 확정 상태 — Iteration 1 스텁.
  *
@@ -16,6 +19,9 @@ public class CancelledState extends AbstractReservationState {
         return "Cancelled";
     }
 
-    // TODO(iter2): requestRefund(Reservation ctx) override.
-    //              환불 불가 운임이면 RefundNotAllowedException (추가 예외 클래스 필요) 던지기.
+    @Override
+    public void requestRefund(Reservation ctx) {
+        ctx.setState(new RefundRequestedState());
+        ctx.updateStatus(ReservationStatus.REFUND_REQUESTED);
+    }
 }

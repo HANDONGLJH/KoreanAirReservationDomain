@@ -11,8 +11,16 @@ public class Route {
         return origin;
     }
 
+    public void setOrigin(Airport origin) {
+        this.origin = origin;
+    }
+
     public Airport getDestination() {
         return destination;
+    }
+
+    public void setDestination(Airport destination) {
+        this.destination = destination;
     }
 
     public boolean isInternationalRoute() {

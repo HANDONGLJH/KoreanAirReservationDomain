@@ -5,6 +5,8 @@ import java.time.LocalDate;
 public class Passenger {
 
     private Long passengerId;
+    private String name;
+    private String contactInfo;
     private String firstName;
     private String lastName;
     private LocalDate dateOfBirth;
@@ -16,7 +18,18 @@ public class Passenger {
         return passengerId;
     }
 
+    public String getName() {
+        return name != null ? name : getFullName();
+    }
+
+    public String getContactInfo() {
+        return contactInfo;
+    }
+
     public String getFullName() {
+        if (firstName == null && lastName == null) {
+            return name;
+        }
         return firstName + " " + lastName;
     }
 

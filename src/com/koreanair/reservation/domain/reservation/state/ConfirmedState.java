@@ -27,5 +27,6 @@ public class ConfirmedState extends AbstractReservationState {
     public void requestCancellation(Reservation ctx) {
         // TODO(iter2): FareRule.isRefundable 1차 확인 후 전이
         ctx.setState(new CancellationRequestedState());
+        ctx.updateStatus(ReservationStatus.CANCELLATION_REQUESTED);
     }
 }

@@ -1,5 +1,8 @@
 package com.koreanair.reservation.domain.reservation.state;
 
+import com.koreanair.reservation.domain.reservation.Reservation;
+import com.koreanair.reservation.domain.reservation.ReservationStatus;
+
 /**
  * 취소 요청 접수 상태 — Iteration 1 스텁.
  *
@@ -14,6 +17,9 @@ public class CancellationRequestedState extends AbstractReservationState {
         return "CancellationRequested";
     }
 
-    // TODO(iter2): confirmCancellation(Reservation ctx) override.
-    //              내부에서 Seat: Booked -> Available 연동도 같이.
+    @Override
+    public void confirmCancellation(Reservation ctx) {
+        ctx.setState(new CancelledState());
+        ctx.updateStatus(ReservationStatus.CANCELLED);
+    }
 }

@@ -32,9 +32,12 @@ public class Reservation {
     private User requester;
     private ReservationStatus status;
     private LocalDateTime createdAt;
+    private LocalDateTime reservationDate;
+    private Itinerary itinerary;
     private List<Passenger> passengers = new ArrayList<>();
     private List<ReservationItem> reservationItems = new ArrayList<>();
     private List<Payment> payments = new ArrayList<>();
+    private List<Ticket> tickets = new ArrayList<>();
 
     // --- State 패턴 ---
     private ReservationState currentState;
@@ -43,6 +46,8 @@ public class Reservation {
         this.currentState = new InitiatedState();   // 초기 상태
         this.status = ReservationStatus.CREATED;
         this.createdAt = LocalDateTime.now();
+        this.reservationDate = this.createdAt;
+        this.itinerary = new Itinerary();
     }
 
     // --- 기존 getter / setter (시그니처 보존) ---
@@ -73,6 +78,14 @@ public class Reservation {
 
     public List<Payment> getPayments() {
         return payments;
+    }
+
+    public List<Ticket> getTickets() {
+        return tickets;
+    }
+
+    public Itinerary getItinerary() {
+        return itinerary;
     }
 
     public void addPassenger(Passenger passenger) {
@@ -130,6 +143,10 @@ public class Reservation {
         return r;
     }
 
+    public static Reservation create(String initialStatus) {
+        return create(ReservationStatus.valueOf(initialStatus));
+    }
+
     public void updatePassengerInfo(Object passengerData) {
     }
 
@@ -184,6 +201,10 @@ public class Reservation {
         currentState.enterPassengerInfo(this);
     }
 
+    public void enterPassengerInfo() {
+        enterPassengerInfo(null);
+    }
+
     public void processPayment() {
         currentState.processPayment(this);
     }
@@ -229,5 +250,9 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public LocalDateTime getReservationDate() {
+        return reservationDate;
     }
 }
