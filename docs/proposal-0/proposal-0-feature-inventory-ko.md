@@ -43,8 +43,8 @@ language: ko
 | | 섹션 | 채운 내용 |
 | :---: | :--- | :--- |
 | ✨ | **1번 시스템과 팀** | 시스템 범위 · 사용자 유형 · Java 데스크톱 앱 구조 · ECB 계층별 팀 분담 |
-| ✏️ | **2번 Feature Inventory** | 전체 기능 목록 제시 후 iteration별 inventory로 필터링하여 구현 순서 설명 |
-| 💡 | **3번 채택 근거** | 각 패턴이 *왜* 그 iteration에 필요한지 (shotgun surgery, OCP 등 설계 원칙 언어로) |
+| ✏️ | **2번 Feature Inventory** | 전체 기능 목록 기준표와 iteration 번호 제시 |
+| 💡 | **3번 Design Pattern Roadmap** | iteration별 inventory와 각 패턴의 채택 근거를 함께 설명 |
 | 🎨 | **5번 UML 4종** | Use Case · Class (속성·연산 풀) · Sequence · State (Mermaid 자동 생성) |
 | 🚀 | **6번 Iteration 1 구현** | Walking Skeleton 8단계 · 11개 패키지 · State 패턴 3단 위임 구조 · 핵심 클래스 표 · 의도적 한계 4건 |
 | 🔮 | **6.6번 Iteration 2-4 개요** | Strategy / Observer / Singleton + Factory Method 구현 계획 한 문단 |
@@ -56,7 +56,7 @@ language: ko
 | <span style="color:red">과목</span> | <span style="color:red">ECE312 객체지향 설계패턴 (2026년 1학기)</span> |
 | <span style="color:red">제출물</span> | <span style="color:red">Proposal#0 — 7주차 (마감 2026-04-16, 18:00 KST)</span> |
 | <span style="color:red">팀</span> | <span style="color:red">A팀 — 김정욱, 이재호, 김경동</span> |
-| <span style="color:red">소스 베이스라인</span> | <span style="color:red">`KoreanAirReservationDomain` (Eclipse 자바 프로젝트, 자바 소스 69개)</span> |
+| <span style="color:red">소스 베이스라인</span> | <span style="color:red">`KoreanAirReservationDomain` (Eclipse 자바 프로젝트, 자바 소스 78개)</span> |
 
 > <span style="color:red">**색상 규칙.** 검정은 원래 Proposal#0 outline에서 그대로 가져온 내용 (Form #1 챕터 도입, Feature Inventory Table, Design Pattern Roadmap, Diagram Policy). 빨간색은 본 제출본에서 그 outline에 새로 추가된 모든 섹션·단락·표·주석을 표시한다.</span>
 
@@ -168,11 +168,17 @@ flowchart LR
 | Options and Settings | Font family and size change | 4 |
 |  | Language and currency unit change | 4 |
 
-### <span style="color:red">2.2 Iteration별 Inventory</span>
+### <span style="color:red">2.2 Inventory 읽는 방식</span>
 
-<span style="color:red">다음으로 같은 목록을 iteration별로 필터링해서 설명한다. 발표 흐름은 "전체 범위 확인 → 이번 iteration에서 실제 구현할 묶음 확인 → 다음 iteration으로 확장" 순서다.</span>
+<span style="color:red">이 표는 전체 시스템 범위를 먼저 보여주기 위한 기준표다. 실제 발표에서는 세 번째 컬럼의 iteration 번호를 기준으로 기능을 필터링한 뒤, 다음 Design Pattern Roadmap에서 각 iteration inventory와 적용 패턴을 함께 설명한다.</span>
 
-#### <span style="color:red">Iteration 1 Inventory - Walking Skeleton / State</span>
+---
+
+## 🎯 Design Pattern Roadmap (minimum 3, maximum 7)
+
+설계프로젝트 #1 최종 보고서에 이미 반영된 두 패턴 — State, Strategy — 가 iteration 1·2의 주축이다. iteration 3과 4에서 Observer와 Singleton을 추가하여 총 4개를 목표로 한다. iteration 4에서 Factory Method를 도입하여 5개로 확장하는 옵션도 열어둔다. 본 과목은 패턴 개수보다 "왜 이 맥락에 이 패턴이 적합한가"를 평가하므로, 아래에서는 각 iteration의 inventory와 패턴 채택 근거를 함께 설명한다.
+
+### <span style="color:red">3.1 Iteration 1 - State 패턴</span>
 
 | <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
 | --- | --- | --- |
@@ -185,9 +191,11 @@ flowchart LR
 | <span style="color:red">Booking Flow</span> | <span style="color:red">Fare validation</span> | <span style="color:red">결제 전 운임 규칙을 검증한다.</span> |
 | <span style="color:red">Booking Flow</span> | <span style="color:red">Payment processing</span> | <span style="color:red">`PendingPayment → Confirmed` State 전이를 발생시킨다.</span> |
 
-<span style="color:red">Iteration 1은 전체 시스템을 얇게 한 번 관통하는 walking skeleton이다. 회원 등록과 로그인으로 사용자를 만들고, 항공편 검색부터 직항 선택, 승객 정보 입력, 운임 검증, 결제까지 이어지는 최소 예약 흐름을 구현한다. 이때 핵심은 기능의 완성도가 아니라 `Reservation` 생애주기가 실제 코드에서 State 패턴으로 움직인다는 점이다. 특히 승객 정보 입력은 `Initiated → PendingPayment`, 결제 성공은 `PendingPayment → Confirmed` 전이를 발생시키므로, iteration 1 발표에서는 이 두 전이를 중심으로 설명한다.</span>
+<span style="color:red">Iteration 1은 전체 시스템을 얇게 한 번 관통하는 walking skeleton이다. 회원 등록과 로그인으로 사용자를 만들고, 항공편 검색부터 직항 선택, 승객 정보 입력, 운임 검증, 결제까지 이어지는 최소 예약 흐름을 구현한다. 이때 핵심은 기능의 완성도가 아니라 `Reservation` 생애주기가 실제 코드에서 State 패턴으로 움직인다는 점이다.</span>
 
-#### <span style="color:red">Iteration 2 Inventory - Lookup / Cancellation / Strategy</span>
+<span style="color:red">State 패턴 없이 구현하면 Reservation의 모든 메서드가 `ReservationStatus` enum에 대한 긴 if/else 사슬로 변질되고, 상태가 하나 추가될 때마다 모든 사슬을 순회해 수정해야 한다 — 이른바 "shotgun surgery"의 교과서 사례다. 패턴을 도입하면 각 생애주기 이벤트는 현재 상태 객체에 대한 다형 호출이 되며, 새 상태 추가는 새 클래스 작성 한 번으로 끝난다.</span>
+
+### <span style="color:red">3.2 Iteration 2 - Strategy 패턴</span>
 
 | <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
 | --- | --- | --- |
@@ -203,9 +211,11 @@ flowchart LR
 | <span style="color:red">Cancellation and Refund</span> | <span style="color:red">Refund disbursement</span> | <span style="color:red">결제 게이트웨이를 통해 환불 지급을 연결한다.</span> |
 | <span style="color:red">e-Ticket</span> | <span style="color:red">e-Ticket issuance</span> | <span style="color:red">PNR 생성과 발권 상태를 연결한다.</span> |
 
-<span style="color:red">Iteration 2는 iteration 1에서 만들어진 예약을 "조회하고, 발권하고, 취소 및 환불할 수 있는" 대상으로 확장한다. 회원과 비회원 모두 예약을 찾을 수 있어야 하므로 조회 기능이 먼저 들어가고, 이후 Confirmed / Ticketed 상태의 예약에 대해 취소 요청을 받는다. 환불은 운임 규칙에 따라 정책이 달라지기 때문에 Strategy 패턴의 주 적용 지점이다. 발표에서는 "환불 가능 여부 판단 → 환불 정책 선택 → 자동 환불 처리 → 결제 게이트웨이 지급" 순서로 설명하면 자연스럽다.</span>
+<span style="color:red">Iteration 2는 iteration 1에서 만들어진 예약을 "조회하고, 발권하고, 취소 및 환불할 수 있는" 대상으로 확장한다. 회원과 비회원 모두 예약을 찾을 수 있어야 하므로 조회 기능이 먼저 들어가고, 이후 Confirmed / Ticketed 상태의 예약에 대해 취소 요청을 받는다. 환불은 운임 규칙에 따라 정책이 달라지기 때문에 Strategy 패턴의 주 적용 지점이다.</span>
 
-#### <span style="color:red">Iteration 3 Inventory - Async / Mileage / Observer</span>
+<span style="color:red">단순 환불 구현은 `RefundHandler.processRefund(...)` 안에 운임 클래스에 대한 switch를 두는데, 이러면 여섯 번째 운임 클래스 추가가 환불 코드, 취소 코드, 그리고 모든 보고 코드를 동시에 건드린다. Strategy는 각 환불 규칙을 `RefundPolicy`를 구현하는 별도 클래스로 패키징하고, `RefundHandler`는 어느 strategy인지 알 필요 없이 `FareRule`이 알려준 strategy를 적용한다 — 정확히 가산적(additive) 진화 (OCP).</span>
+
+### <span style="color:red">3.3 Iteration 3 - Observer 패턴</span>
 
 | <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
 | --- | --- | --- |
@@ -220,9 +230,11 @@ flowchart LR
 | <span style="color:red">Connecting and Multi-city</span> | <span style="color:red">Through-check-in for baggage on connections</span> | <span style="color:red">환승 여정의 수하물 연결 조건을 확인한다.</span> |
 | <span style="color:red">Connecting and Multi-city</span> | <span style="color:red">Independent fare calculation per segment</span> | <span style="color:red">multi-city 구간별 독립 운임 계산을 수행한다.</span> |
 
-<span style="color:red">Iteration 3는 단순 직항 예약을 넘어 비동기 이벤트와 복합 여정을 다룬다. 좌석 hold 만료, 결제 실패 후 자동 취소, 외부 Skypass 검증처럼 한 객체의 변화가 다른 객체나 UI 알림으로 전파되어야 하는 기능이 많아진다. 이 때문에 Observer 패턴을 도입하기 좋은 시점이다. 또한 환승과 multi-city는 단일 항공편 선택보다 검증 조건이 많으므로, layover 검증과 구간별 운임 계산을 별도 흐름으로 설명한다.</span>
+<span style="color:red">Iteration 3는 단순 직항 예약을 넘어 비동기 이벤트와 복합 여정을 다룬다. 좌석 hold 만료, 결제 실패 후 자동 취소, 외부 Skypass 검증처럼 한 객체의 변화가 다른 객체나 UI 알림으로 전파되어야 하는 기능이 많아진다. 이 때문에 Observer 패턴을 도입하기 좋은 시점이다.</span>
 
-#### <span style="color:red">Iteration 4 Inventory - Final Polish / Singleton / Factory Method</span>
+<span style="color:red">항공편 스케줄 변경은 해당 항공편의 모든 예약에 전파되어야 하고, 결제 실패 후 자동 취소는 잡고 있던 좌석을 해제해야 하며, 환불 마감 임박은 알림을 발생시켜야 한다. 이 모두가 한 엔티티가 발행한 이벤트를 0개 이상의 observer가 소비하는 형태로 자연스럽게 표현된다 — Observer가 설계된 비대칭 1:N 관계 그대로다.</span>
+
+### <span style="color:red">3.4 Iteration 4 - Singleton (+ Factory Method)</span>
 
 | <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
 | --- | --- | --- |
@@ -232,33 +244,9 @@ flowchart LR
 | <span style="color:red">Options and Settings</span> | <span style="color:red">Font family and size change</span> | <span style="color:red">전역 UI 설정을 Singleton으로 관리한다.</span> |
 | <span style="color:red">Options and Settings</span> | <span style="color:red">Language and currency unit change</span> | <span style="color:red">언어·통화 단위 같은 전역 설정을 일관되게 반영한다.</span> |
 
-<span style="color:red">Iteration 4는 최종 polish 단계다. 일반 예약 흐름 밖에 있는 예외 환불 관리자 검토, e-티켓 PDF 다운로드, 예약 상태 실시간 추적처럼 사용자에게 완성도를 보여주는 기능을 마무리한다. 전역 설정은 애플리케이션 전체에서 같은 값이 공유되어야 하므로 Singleton 패턴의 사례로 설명한다. 선택적으로 Direct, Connecting, Multi-city 일정 생성을 Factory Method로 분리하면, 최종 iteration에서 패턴 수와 설계 완성도를 함께 높일 수 있다.</span>
+<span style="color:red">Iteration 4는 최종 polish 단계다. 일반 예약 흐름 밖에 있는 예외 환불 관리자 검토, e-티켓 PDF 다운로드, 예약 상태 실시간 추적처럼 사용자에게 완성도를 보여주는 기능을 마무리한다. 전역 설정은 애플리케이션 전체에서 같은 값이 공유되어야 하므로 Singleton 패턴의 사례로 설명한다.</span>
 
-> <span style="color:red">**분포 근거 (신규 추가).** 위 기능-iteration 매핑은 임의가 아니다. iteration 1은 State 패턴의 happy path를 구동하는 최소 기능 묶음이고, iteration 2는 예약 조회와 취소·환불 클러스터를 추가하면서 Strategy 패턴을 도입한다. iteration 3는 결제 실패, 좌석 hold, 마일리지, 환승·multi-city처럼 이벤트 전파와 외부 검증이 필요한 기능을 묶어 Observer 적용 지점을 만든다. iteration 4는 관리자 예외 처리, PDF, 실시간 상태 추적, 전역 설정으로 마무리하며 Singleton과 선택적 Factory Method를 적용한다. 따라서 발표에서는 전체 표를 먼저 보여준 뒤, 네 개의 iteration inventory를 순서대로 넘기며 "왜 이 기능들이 같은 iteration에 묶였는지"를 설명한다.</span>
-
----
-
-## 🎯 Design Pattern Roadmap (minimum 3, maximum 7)
-
-설계프로젝트 #1 최종 보고서에 이미 반영된 두 패턴 — State, Strategy — 가 iteration 1·2의 주축이다. iteration 3과 4에서 Observer와 Singleton을 추가하여 총 4개를 목표로 한다. iteration 4에서 Factory Method를 도입하여 5개로 확장하는 옵션도 열어둔다. 본 과목은 패턴 개수보다 "왜 이 맥락에 이 패턴이 적합한가"를 평가하므로, 매 iteration 보고서에서 패턴 적용 전후의 구조 변화와 채택 근거를 상세히 기술한다.
-
-**Iteration 1 — State 패턴.** Reservation 생애주기(Initiated → PendingPayment → Confirmed → Ticketed → CancellationRequested → Cancelled → RefundRequested → Refunded)를 8개 구상 상태 클래스로 옮긴다. 설계프로젝트 #1의 상세 설계(`ReservationState` 인터페이스 + 8개 구상 클래스)를 최소 변경으로 코드화한다.
-
-**Iteration 2 — Strategy 패턴.** 환불 정책 family(`RefundPolicy` 인터페이스 + `NoRefundPolicy`, `PartialRefundPolicy`, `FullRefundPolicy` 구상 클래스)를 적용한다. Y/Q/M/B/H 운임 클래스에 따른 분기 로직을 개별 strategy 클래스로 격리하여, `FareRule` 변경이 환불 처리 코드로 누수되지 않도록 한다.
-
-**Iteration 3 — Observer 패턴.** 항공편 스케줄 변경, 결제 실패 등 외부 이벤트 발생 시 영향을 받는 예약 엔티티에 알림을 전파한다. 시러버스에 명시된 popup dialog 요건을 탑승 리마인더, 환불 마감 알림 등으로 재해석하여 자연스럽게 통합한다.
-
-**Iteration 4 (Final) — Singleton 패턴.** 폰트 family·크기, 언어, 통화 단위 등 전역 설정 객체를 관리한다. 애플리케이션 전체에서 공유하는 단일 인스턴스가 필요한 전형적인 Singleton 사용 사례다. Factory Method를 추가 도입하여 `Itinerary` 생성(Direct, Connecting, Multi-city)을 팩토리로 추출함으로써 패턴 개수를 5개로 확장할 수 있다.
-
-> <span style="color:red">**Iteration별 채택 근거 (신규 추가).** 위 로드맵은 어떤 패턴인지를 명명하며, 아래 단락들은 *왜* 그 시점에 그 패턴이 필요한지를 설명한다 — 다른 iteration에서는 부족하거나 과도한 이유까지 함께.</span>
-
-> <span style="color:red">*Iteration 1 — State.* State 패턴 없이 구현하면 Reservation의 모든 메서드가 `ReservationStatus` enum에 대한 긴 if/else 사슬로 변질되고, 상태가 하나 추가될 때마다 모든 사슬을 순회해 수정해야 한다 — 이른바 "shotgun surgery"의 교과서 사례다. 패턴을 도입하면 각 생애주기 이벤트는 현재 상태 객체에 대한 다형 호출이 되며, 새 상태 추가는 새 클래스 작성 한 번으로 끝난다.</span>
-
-> <span style="color:red">*Iteration 2 — Strategy.* 단순 환불 구현은 `RefundHandler.processRefund(...)` 안에 운임 클래스에 대한 switch를 두는데, 이러면 여섯 번째 운임 클래스 추가가 환불 코드, 취소 코드, 그리고 모든 보고 코드를 동시에 건드린다. Strategy는 각 환불 규칙을 `RefundPolicy`를 구현하는 별도 클래스로 패키징하고, `RefundHandler`는 어느 strategy인지 알 필요 없이 `FareRule`이 알려준 strategy를 적용한다 — 정확히 가산적(additive) 진화 (OCP).</span>
-
-> <span style="color:red">*Iteration 3 — Observer.* iteration 3의 여러 기능이 비동기 경계를 넘는다. 항공편 스케줄 변경은 해당 항공편의 모든 예약에 전파되어야 하고, 결제 실패 후 자동 취소는 잡고 있던 좌석을 해제해야 하며, 환불 마감 임박은 알림을 발생시켜야 한다. 이 모두가 한 엔티티가 발행한 이벤트를 0개 이상의 observer가 소비하는 형태로 자연스럽게 표현된다 — Observer가 설계된 비대칭 1:N 관계 그대로다.</span>
-
-> <span style="color:red">*Iteration 4 — Singleton (+ Factory Method).* 전역 설정(폰트 family·크기, 언어, 통화 단위)은 Singleton의 교과서적 사용처다. 실행 중 인스턴스 1개, 다수 reader, lazy initialisation 허용. `volatile` 필드 + double-checked locking으로 thread interleaving에서 깨지는 toy 형태가 아니라 교과서적으로 정확한 구현을 한다. 옵션 Factory Method는 `Itinerary` 생성(Direct, Connecting, Multi-city)을 `ItineraryFactory.create(...)`로 추출하여 `new Connecting(new Direct(...))` ladder를 피한다.</span>
+<span style="color:red">전역 설정(폰트 family·크기, 언어, 통화 단위)은 Singleton의 교과서적 사용처다. 실행 중 인스턴스 1개, 다수 reader, lazy initialisation 허용. `volatile` 필드 + double-checked locking으로 thread interleaving에서 깨지는 toy 형태가 아니라 교과서적으로 정확한 구현을 한다. 옵션 Factory Method는 `Itinerary` 생성(Direct, Connecting, Multi-city)을 `ItineraryFactory.create(...)`로 추출하여 `new Connecting(new Direct(...))` ladder를 피한다.</span>
 
 ---
 
@@ -285,53 +273,63 @@ flowchart LR
 
 ### <span style="color:red">5.1 Use Case Diagram</span>
 
-<span style="color:red">본 시스템은 14개 use case와 3개 액터(Guest, Skypass 회원, Admin), 2개 외부 시스템(Payment Gateway, Skypass System)을 가진다. `운임 검증 (Validate Fare)` use case는 가격 계산이 필요한 모든 예약 흐름(직항, 환승, multi-city)에서 UML *include* 관계로 재사용된다. 예약 흐름 자체는 운임 검증 단계가 동일하더라도 오케스트레이션 로직이 다르므로 별도로 둔다.</span>
+<span style="color:red">본 시스템의 Amateras Use Case Diagram은 설계프로젝트 #1 모델을 기준으로 16개 use case와 4개 사용자/관리자 액터(Passenger, Skypass Member, Guest, Admin), 3개 외부 시스템(Payment Gateway, Skypass System, GDS)을 가진다. Proposal #0 문서의 Mermaid는 그 구조를 발표용으로 요약한 작업본이며, `src/reservationSystem.ucd`와 `GenerateUseCaseDiagram`이 제출용 다이어그램의 기준이다.</span>
 
 ```mermaid
 flowchart LR
-    Guest((비회원))
-    Member((Skypass 회원))
+    Passenger((Passenger))
+    Member((Skypass Member))
+    Guest((Guest))
     Admin((관리자))
     Payment((결제 게이트웨이))
     Skypass((Skypass 시스템))
+    GDS((GDS))
 
-    UC1[UC1 회원 가입]
-    UC2[UC2 로그인 / 로그아웃]
-    UC3[UC3 항공편 검색]
-    UC4[UC4 직항 선택]
-    UC5[UC5 일정 상세 조회]
-    UC6[UC6 승객 정보 입력]
-    UC7[UC7 운임 검증]
-    UC8[UC8 결제 처리]
-    UC9[UC9 환승편 예약]
-    UC10[UC10 Multi-city 일정 구성]
-    UC11[UC11 예약 조회]
-    UC12[UC12 취소 및 환불]
-    UC13[UC13 e-티켓 발급]
-    UC14[UC14 설정 변경]
+    UC1[Login]
+    UC2[Search Flights]
+    UC3[Book Flight]
+    UC4[Book Multi-segment Trip]
+    UC5[Select Seat]
+    UC6[Make Payment]
+    UC7[Apply Mileage]
+    UC8[View Booking]
+    UC9[Cancel Booking]
+    UC10[View e-Ticket]
+    UC11[Refund Denied]
+    UC12[Retrieve Booking by PNR]
+    UC13[Review Refund Request]
+    UC14[Manage Flight Schedule]
+    UC15[Update Flight Status]
+    UC16[Search Interline Flights]
 
-    Guest --- UC1
-    Guest --- UC3
-    Guest --- UC4
-    Guest --- UC5
-    Guest --- UC6
-    Guest --- UC8
-    Member --- UC2
-    Member --- UC9
-    Member --- UC10
-    Member --- UC11
-    Member --- UC12
-    Member --- UC13
-    Member --- UC14
-    Admin --- UC12
-    UC8 --- Payment
-    UC2 --- Skypass
-    UC7 -. include .-> UC4
-    UC7 -. include .-> UC9
-    UC7 -. include .-> UC10
+    Passenger --- UC2
+    Passenger --- UC3
+    Passenger --- UC4
+    Passenger --- UC8
+    Passenger --- UC9
+    Passenger --- UC10
+    Guest --- UC12
+    Member --- UC1
+    Member --- UC7
+    Admin --- UC1
+    Admin --- UC13
+    Admin --- UC14
+    Admin --- UC15
+    Admin --- UC11
+    UC6 --- Payment
+    UC7 --- Skypass
+    UC16 --- GDS
+    UC3 -. include .-> UC6
+    UC4 -. include .-> UC3
+    UC12 -. include .-> UC8
+    UC12 -. include .-> UC9
+    UC5 -. extend .-> UC3
+    UC7 -. extend .-> UC6
+    UC11 -. extend .-> UC9
+    UC16 -. extend .-> UC2
 ```
 
-<span style="color:red">**1st iteration 범위 (Walking Skeleton).** 8개 use case가 iteration 1 happy path를 구성한다 — UC1 회원 가입, UC2 로그인/로그아웃, UC3 항공편 검색, UC4 직항 선택, UC5 일정 상세 조회, UC6 승객 정보 입력, UC7 운임 검증, UC8 결제 처리. 나머지 6개는 패턴 로드맵에 맞춰 iteration 2-4에 배분된다. UC11 예약 조회와 UC12 취소·환불은 Strategy 패턴과 함께 iteration 2에 들어가고, UC9 환승, UC10 multi-city, 그리고 UC8의 비동기 부분(결제 자동 취소)은 Observer와 함께 iteration 3에 들어가며, UC13 e-티켓 PDF·실시간 추적과 UC14 설정 변경은 Singleton과 함께 iteration 4에 들어간다.</span>
+<span style="color:red">**1st iteration 범위 (Walking Skeleton).** 현재 코드에서 end-to-end로 실행되는 범위는 `Login`, `Search Flights`, `Book Flight`, `Make Payment`의 happy path다. `Select Seat`, `Apply Mileage`, `Cancel Booking`, `View e-Ticket`, 관리자 환불 검토, GDS 환승 검색은 다이어그램에 먼저 고정한 설계 표면이며, 코드에는 컴파일 가능한 stub 또는 비활성 UI placeholder로 존재한다.</span>
 
 ### <span style="color:red">5.2 Class Diagram (ECB)</span>
 
@@ -356,6 +354,15 @@ classDiagram
     }
     class SkypassInterface {
         <<interface>>
+        +verifyMembership(skypassNumber, password) Object
+        +getMileageBalance(skypassNumber) int
+        +deductMileage(skypassNumber, amount) boolean
+        +verifyAndDeduct(skypassNumber, amount) Object
+    }
+    class GDSInterface {
+        <<interface>>
+        +searchInterlineFlights(origin, destination) List
+        +getPartnerAvailability(flightNumber) List
     }
     class BookingController {
         -authService : AuthService
@@ -388,8 +395,10 @@ classDiagram
     }
     class RefundHandler {
         +evaluateRefund(pnr, fareClass) Object
+        +getRefundDetail(requestId) RefundRequest
         +processRefund(requestId, approvedAmount) void
         +denyRefund(requestId, reason) void
+        +getPendingRequests() List
     }
     class Reservation {
         -reservationId : Long
@@ -399,6 +408,8 @@ classDiagram
         -createdAt : LocalDateTime
         -passengers : List~Passenger~
         -payments : List~Payment~
+        -itinerary : Itinerary
+        -tickets : List~Ticket~
         -currentState : ReservationState
         +enterPassengerInfo(passenger) void
         +processPayment() void
@@ -451,21 +462,27 @@ classDiagram
     }
     class TicketedState {
         +name() String
+        +requestCancellation(ctx) void
     }
     class CancellationRequestedState {
         +name() String
+        +confirmCancellation(ctx) void
     }
     class CancelledState {
         +name() String
+        +requestRefund(ctx) void
     }
     class RefundRequestedState {
         +name() String
+        +processRefundDecision(ctx, approved) void
     }
     class RefundedState {
         +name() String
     }
     class Passenger {
         -passengerId : Long
+        -name : String
+        -contactInfo : String
         -firstName : String
         -lastName : String
         -dateOfBirth : LocalDate
@@ -473,7 +490,37 @@ classDiagram
         -passportNumber : String
         -passengerType : PassengerType
         +getFullName() String
+        +getName() String
+        +getContactInfo() String
         +getPassengerType() PassengerType
+    }
+    class SkypassMember {
+        -skypassNumber : String
+        -tier : String
+        +getSkypassNumber() String
+        +getTier() String
+    }
+    class Guest {
+        -guestSessionId : String
+        +getGuestSessionId() String
+    }
+    class MileageAccount {
+        -balance : int
+        +getBalance() int
+        +updateBalance(remainingMileage) void
+    }
+    class Itinerary {
+        -tripType : String
+        +getTripType() String
+        +getSegments() List
+    }
+    class Segment {
+        -sequenceNumber : int
+        -departureTime : LocalDateTime
+        -arrivalTime : LocalDateTime
+        -connectionTime : Duration
+        +getSequenceNumber() int
+        +getDepartureTime() LocalDateTime
     }
     class FareRule {
         -fareRuleId : Long
@@ -504,9 +551,19 @@ classDiagram
         -departureDateTime : LocalDateTime
         -arrivalDateTime : LocalDateTime
         -status : FlightStatus
+        +getFlightNumber() String
+        +getDuration() Duration
         +isAvailableForBooking() boolean
         +findSeatInventory(bookingClass) SeatInventory
     }
+    class RefundPolicy {
+        <<interface>>
+        +calculateRefundAmount(baseAmount) int
+        +getRefundType() String
+    }
+    class FullRefundPolicy
+    class PartialRefundPolicy
+    class NoRefundPolicy
 
     ReservationState <|.. AbstractReservationState
     AbstractReservationState <|-- InitiatedState
@@ -517,9 +574,17 @@ classDiagram
     AbstractReservationState <|-- CancelledState
     AbstractReservationState <|-- RefundRequestedState
     AbstractReservationState <|-- RefundedState
+    Passenger <|-- SkypassMember
+    Passenger <|-- Guest
+    RefundPolicy <|.. FullRefundPolicy
+    RefundPolicy <|.. PartialRefundPolicy
+    RefundPolicy <|.. NoRefundPolicy
     Reservation o--> ReservationState : currentState
     Reservation "1" o--> "1..*" Passenger
     Reservation "1" o--> "0..*" Payment
+    Reservation "1" o--> "1" Itinerary
+    Itinerary "1" o--> "1..*" Segment
+    SkypassMember "1" --> "1" MileageAccount
     Reservation --> FareRule
     BookingController --> AuthService
     BookingController --> FlightSearchService
@@ -527,10 +592,13 @@ classDiagram
     BookingController --> Reservation
     BookingController ..> ReservationUI
     PaymentProcessor --> PaymentGatewayInterface
+    RefundHandler ..> RefundPolicy
+    RefundHandler --> Reservation
+    GDSInterface --> FlightSchedule
     FlightSearchService --> FlightSchedule
 ```
 
-<span style="color:red">**1st iteration 범위.** 위 다이어그램의 모든 클래스는 코드베이스에 이미 존재한다. 8개 `*State` 중 3개(`InitiatedState`, `PendingPaymentState`, `ConfirmedState`)만 iteration 1에서 실제 동작을 수행하며, 나머지 5개는 선언만 있고 생애주기 메서드는 `AbstractReservationState`의 디폴트 거부(`InvalidStateTransitionException` throw)를 상속하거나 `TODO(iter2)` stub 상태다. Boundary와 Control 계층은 iteration 1에서 끝까지 연결되어 있으며, iteration 2 이후의 확장은 가산적이다 — 예를 들어 `RefundHandler`는 현재 빈 메서드 본문으로 선언만 되어 있고, iteration 2에서 Strategy 환불 family가 들어올 때 실제 구현이 채워진다.</span>
+<span style="color:red">**1st iteration 범위.** 위 다이어그램의 타입과 주요 operation은 코드베이스에 존재한다. 다만 iteration 1에서 사용자 경로로 실제 실행되는 부분은 `AuthService`, `FlightSearchService`, `BookingController`, `PaymentProcessor`, `Reservation`, `Payment`, 그리고 State family의 `InitiatedState`, `PendingPaymentState`, `ConfirmedState` 중심 happy path다. `Itinerary`, `Segment`, `GDSInterface`, `RefundPolicy` family, 후반 취소·환불 상태 전이는 다이어그램 정합성을 위해 stub 또는 단순 전이로 존재하며, 본격 비즈니스 규칙은 iteration 2 이후에 채운다.</span>
 
 ### <span style="color:red">5.3 Sequence Diagram — Book Flight (Iteration 1 Happy Path)</span>
 
@@ -578,7 +646,7 @@ sequenceDiagram
 
 ### <span style="color:red">5.4 State Diagram — Reservation</span>
 
-<span style="color:red">Reservation의 생애주기는 8개 상태와 10개 전이로 구성된 유한 상태 기계다. 두 상태(`Cancelled`, `Refunded`)는 종착 상태다. 아래 다이어그램은 시러버스의 표기 컨벤션 `현재 → 다음 : 이벤트` 를 따르며, 이벤트는 전이를 트리거하는 `Reservation`의 메서드명이다.</span>
+<span style="color:red">Reservation의 생애주기는 8개 상태와 12개 전이로 구성된 유한 상태 기계다. `Cancelled`는 환불 불가 운임이면 종착 상태가 될 수 있고, 환불 가능 운임이면 `RefundRequested`로 이어진다. `Refunded`는 항상 종착 상태다. 아래 다이어그램은 `src/reservationState.acd`의 Amateras 상태도를 Mermaid로 옮긴 작업본이다.</span>
 
 ```mermaid
 stateDiagram-v2
@@ -590,13 +658,14 @@ stateDiagram-v2
     Confirmed --> CancellationRequested : requestCancellation (취소 요청)
     Ticketed --> CancellationRequested : requestCancellation (취소 요청)
     CancellationRequested --> Cancelled : confirmCancellation (취소 확정)
-    CancellationRequested --> RefundRequested : requestRefund (환불 요청)
-    RefundRequested --> Refunded : processRefundDecision (환불 승인)
+    Cancelled --> RefundRequested : requestRefund (환불 요청)
+    Cancelled --> [*] : non-refundable fare
+    RefundRequested --> Refunded : processRefundDecision(true)
+    RefundRequested --> Cancelled : processRefundDecision(false)
     Refunded --> [*]
-    Cancelled --> [*]
 ```
 
-<span style="color:red">**1st iteration 범위.** iteration 1에서 끝까지 동작하는 전이는 3개다 — `Initiated → PendingPayment` (`enterPassengerInfo`), `PendingPayment → Confirmed` (`processPayment` 성공 시), `PendingPayment → Cancelled` (`handlePaymentFailure`). 나머지 7개 전이는 해당 `*State` 클래스에 선언은 되어 있으나 본문은 `TODO(iter2)` / `TODO(iter3)` placeholder 상태이며, iteration 2에서 Strategy 환불 family와 함께 실제 동작에 들어간다.</span>
+<span style="color:red">**1st iteration 범위.** 실행 시나리오에서 검증하는 전이는 `Initiated → PendingPayment`와 `PendingPayment → Confirmed` 두 개이며, 결제 실패 경로에서는 `PendingPayment → Cancelled`도 동작한다. 후반 취소·발권·환불 전이는 다이어그램과 코드 정합성을 위해 단순 상태 전이로 구현되어 있으나, Ticket 생성, 좌석 해제, 환불 금액 산정, PG 환불 송금 같은 비즈니스 본문은 iteration 2 이후에 채운다.</span>
 
 ---
 
@@ -628,13 +697,13 @@ stateDiagram-v2
 | --- | --- | --- |
 | <span style="color:red">`app`</span> | <span style="color:red">애플리케이션 진입점, 목 인프라</span> | <span style="color:red">`App`, `SwingApp`, `ConsoleReservationUI`, `MockPaymentGateway`, `sample.SampleData`</span> |
 | <span style="color:red">`app.swing`</span> | <span style="color:red">Swing UI 패널</span> | <span style="color:red">`MainFrame`, `LoginPanel`, `SearchPanel`, `PassengerPanel`, `PaymentPanel`, `ConfirmationPanel`, `StateBadge`</span> |
-| <span style="color:red">`boundary`</span> | <span style="color:red">ECB Boundary 인터페이스</span> | <span style="color:red">`ReservationUI`, `PaymentGatewayInterface`, `SkypassInterface`</span> |
+| <span style="color:red">`boundary`</span> | <span style="color:red">ECB Boundary 인터페이스</span> | <span style="color:red">`ReservationUI`, `PaymentGatewayInterface`, `SkypassInterface`, `GDSInterface`(설계 stub)</span> |
 | <span style="color:red">`control`</span> | <span style="color:red">ECB Control 서비스</span> | <span style="color:red">`BookingController`, `AuthService`, `FlightSearchService`, `PaymentProcessor`, `RefundHandler`(선언만, iter2에서 본격 사용)</span> |
-| <span style="color:red">`domain.reservation`</span> | <span style="color:red">Reservation 애그리거트</span> | <span style="color:red">`Reservation` (Context), `ReservationStatus`, `Ticket`, `ReservationItem`, `SeatAssignment`</span> |
+| <span style="color:red">`domain.reservation`</span> | <span style="color:red">Reservation 애그리거트</span> | <span style="color:red">`Reservation` (Context), `ReservationStatus`, `Itinerary`, `Segment`, `Ticket`, `ReservationItem`, `SeatAssignment`</span> |
 | <span style="color:red">`domain.reservation.state`</span> | <span style="color:red">State 패턴</span> | <span style="color:red">`ReservationState`, `AbstractReservationState`, 8개 구상 상태, `InvalidStateTransitionException`</span> |
 | <span style="color:red">`domain.flight`</span> | <span style="color:red">Flight·운임 엔티티</span> | <span style="color:red">`Flight`, `FlightSchedule`, `FareRule`, `Fare`, `Airport`, `Route`, `Seat`, `SeatInventory`</span> |
-| <span style="color:red">`domain.passenger`</span> | <span style="color:red">Passenger 엔티티</span> | <span style="color:red">`Passenger`, `MileageAccount`(iter3), `PassengerType`</span> |
-| <span style="color:red">`domain.payment`</span> | <span style="color:red">Payment 엔티티</span> | <span style="color:red">`Payment`, `PaymentMethod`, `PaymentStatus`, `Refund`(iter2), `RefundRequest`(iter2)</span> |
+| <span style="color:red">`domain.passenger`</span> | <span style="color:red">Passenger 엔티티</span> | <span style="color:red">`Passenger`, `SkypassMember`, `Guest`, `MileageAccount`, `PassengerType`</span> |
+| <span style="color:red">`domain.payment`</span> | <span style="color:red">Payment 엔티티</span> | <span style="color:red">`Payment`, `PaymentMethod`, `PaymentStatus`, `Refund`, `RefundRequest`, `RefundPolicy` family(Strategy 설계 stub)</span> |
 | <span style="color:red">`domain.user`</span> | <span style="color:red">Actor 엔티티</span> | <span style="color:red">`User`, `Member`, `Admin`, `GuestBookingRequester`</span> |
 | <span style="color:red">`tools`</span> | <span style="color:red">AmaterasUML 에미터</span> | <span style="color:red">`GenerateUseCaseDiagram`, `GenerateClassDiagram`, `GenerateSequenceDiagrams`, `GenerateStateDiagrams`</span> |
 
@@ -677,17 +746,18 @@ stateDiagram-v2
 
 <span style="color:red">walking skeleton은 끝까지 동작하지만 iteration 2에서 명시적으로 닫을 여러 모서리(corner)가 있다. 미리 나열해 두면 iteration 2 범위가 모호해지지 않는다.</span>
 
-<span style="color:red">- **`FlightSearchService.search(...)`는 파라미터를 무시하고** in-memory 카탈로그 전체를 반환한다. `FlightSchedule`의 출발 시간·route getter가 placeholder 값을 반환하기 때문에 필터링이 모든 레코드를 무성의하게 떨어뜨릴 위험이 있어, getter 연동을 iteration 2로 미뤘다. iteration 2에서 getter를 채우고 본문을 실제 predicate로 교체한다.
+<span style="color:red">- **`FlightSearchService.search(...)`는 파라미터를 무시하고** in-memory 카탈로그 전체를 반환한다. 다이어그램 정합성을 위해 `FlightSchedule.getFlightNumber()`와 `getDuration()` 같은 조회 메서드는 존재하지만, 검색 predicate는 아직 실제 출도착/일자 매칭을 수행하지 않는다.
 - **`AuthService.login(...)`은 어떤 비밀번호 문자열이든 통과시킨다.** 현재 구현은 Skypass 번호로 회원을 조회하여 그대로 반환할 뿐 비밀번호를 검증하지 않는다. iteration 2에서 salted-hash 검증을 도입하고 로그인 실패를 `null` 반환이 아니라 예외로 변환한다.
-- **`ConfirmedState.issueTicket(...)`과 `ConfirmedState.requestCancellation(...)`은 상태 전이는 수행하지만 본문이 비어 있다.** `Ticket` 객체 생성도, `RefundHandler` 호출도 아직 없다. 이는 iteration 1을 State 패턴 하나에 집중시키기 위한 비용이며, iteration 2에서 본문을 채워 Strategy 환불 family와 연결한다.
-- **`RefundHandler`, `RefundPolicy`, observer, `AppConfig` singleton, `ItineraryFactory`는 아직 코드베이스에 존재하지 않는다.** 위 로드맵에 따라 iteration 2(Strategy), 3(Observer), 4(Singleton, Factory Method)에 각각 등장한다.</span>
+- **취소·환불·발권 상태 전이는 다이어그램 기준으로 존재하지만 본문은 얇다.** `Ticket` 객체 생성, 좌석 해제, 환불 금액 산정, PG 환불 송금은 아직 실제 use case로 연결되지 않았다.
+- **`RefundPolicy` family, `GDSInterface`, `Itinerary`, `Segment`, `SkypassMember`, `Guest`는 현재 설계 stub다.** Amateras Class Diagram의 타입 정합성을 맞추기 위해 코드에 존재하지만, 본격 비즈니스 로직은 iteration 2와 3에서 채운다.
+- **Observer, `AppConfig` singleton, `ItineraryFactory`는 아직 코드베이스에 존재하지 않는다.** 위 로드맵에 따라 iteration 3(Observer), iteration 4(Singleton, Factory Method)에 각각 등장한다.</span>
 
 ### <span style="color:red">🔮 6.6 다음 Iteration 개요</span>
 
 > [!TIP]
 > 🔮 **발표 단계 3 / 3** — 다음 주에 무엇을 구현할지 (마무리 슬라이드)
 
-<span style="color:red">iteration 2는 Strategy 패턴을 `RefundPolicy` family(`NoRefundPolicy`, `PartialRefundPolicy`, `FullRefundPolicy`)로 도입하여 `ConfirmedState.issueTicket`, 취소 체인(`CancellationRequestedState`, `CancelledState.requestRefund`, `RefundRequestedState.processRefundDecision`), `RefundHandler`의 본문을 채우고, 같은 작업에서 `FlightSearchService.search`에 실제 predicate를 도입하고 `AuthService.login`에 salted-hash 검증을 붙이며 Feature Inventory의 Authentication / Reservation Lookup / Cancellation-and-Refund / e-Ticket 발급 행을 모두 점등시킨다. iteration 3는 Observer를 도입하여 `Reservation.setState`, `FlightSchedule.changeStatus`, `Payment.fail`에서 이벤트를 발행하고, 이를 결제 자동 취소(좌석 해제), 환승·multi-city 일정(MCT layover 검증 포함), `SkypassInterface`와 연동된 마일리지 클러스터의 동력으로 사용한다. iteration 4는 전역 폰트·언어·통화 설정용 `AppConfig` singleton(`volatile` + double-checked locking), 세 가지 itinerary 변형을 위한 옵션 Factory Method(`ItineraryFactory`), 예외 환불 관리자 경로, e-Ticket PDF 다운로드와 실시간 추적으로 마무리한다 — 이 시점에 2의 모든 행이 출시 상태이고, 8개 `*State` 클래스에 `TODO(iterN)` 마커가 남지 않으며, 6.1의 walking-skeleton happy path가 `App.main(...)`에서 변경 없이 그대로 동작하여 회귀 검증 역할을 한다.</span>
+<span style="color:red">iteration 2는 이미 코드에 stub로 들어온 Strategy 패턴(`RefundPolicy`, `NoRefundPolicy`, `PartialRefundPolicy`, `FullRefundPolicy`)에 실제 환불 금액 산정과 `RefundHandler` orchestration을 채우고, `ConfirmedState.issueTicket`, 취소 체인, e-Ticket 발급, 예약 조회를 실제 use case로 연결한다. 같은 작업에서 `FlightSearchService.search`에 실제 predicate를 도입하고 `AuthService.login`에 salted-hash 검증을 붙인다. iteration 3는 Observer를 도입하여 `Reservation.setState`, `FlightSchedule.changeStatus`, `Payment.fail`에서 이벤트를 발행하고, 이를 결제 자동 취소(좌석 해제), 환승·multi-city 일정(MCT layover 검증 포함), `SkypassInterface`와 연동된 마일리지 클러스터의 동력으로 사용한다. iteration 4는 전역 폰트·언어·통화 설정용 `AppConfig` singleton(`volatile` + double-checked locking), 세 가지 itinerary 변형을 위한 옵션 Factory Method(`ItineraryFactory`), 예외 환불 관리자 경로, e-Ticket PDF 다운로드와 실시간 추적으로 마무리한다.</span>
 
 ---
 
