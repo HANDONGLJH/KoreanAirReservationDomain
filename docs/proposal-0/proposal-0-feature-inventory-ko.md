@@ -412,6 +412,16 @@ flowchart LR
 - <span style="color:red">Iteration 1 클래스 다이어그램은 시연 happy path에서 실제로 호출되는 Boundary, Control, Entity만 남긴다.</span>
 - <span style="color:red">취소·환불, GDS, 마일리지, multi-city, 관리자 기능은 이후 iteration 범위이므로 제외한다.</span>
 
+<div align="center">
+
+<img src="images/class_diagram_iter1_mapping_clean.png" width="95%">
+
+<br>
+
+<sub><span style="color:red">빨간 박스 = Iteration 1에서 실제 구현 및 시연 범위</span></sub>
+
+</div>
+
 ```mermaid
 classDiagram
     class ReservationUI {
