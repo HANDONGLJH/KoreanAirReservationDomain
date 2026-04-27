@@ -66,77 +66,26 @@ language: ko
 ## <span style="color:red">📌 0. 실행 방법 및 시연</span>
 
 > [!NOTE]
-> 🚀 **시연 준비** — 발표 전에 아래 명령어를 실행하여 콘솔 및 Swing 앱을 미리 확인한다.
+> 🚀 **시연 준비** — 아래 명령어로 Swing UI를 실행한다.
 
-### <span style="color:red">0.1 프로젝트 구조</span>
-
-```
-KoreanAirReservationDomain/
-├── src/                    # Java 소스 (78개 파일)
-├── bin/                    #编译된 클래스
-└── docs/proposal-0/       # Proposal 문서
-```
-
-### <span style="color:red">0.2 컴파일 (수정 후 필요시)</span>
+### <span style="color:red">0.1 Swing UI 실행</span>
 
 ```bash
-cd /Users/gimjungwook/Projects/eclipse/KoreanAirReservationDomain
-javac -sourcepath src -d bin $(find src -name "*.java" | grep -v "tools/")
-```
-
-> **참고:** `tools/` 패키지는 Eclipse Amateras UML 라이브러리依赖 (별도 설치 필요)이므로 제외하고 컴파일한다.
-
-### <span style="color:red">0.3 콘솔 앱 실행 (App.main)</span>
-
-```bash
-java -cp bin com.koreanair.reservation.app.App
-```
-
-**예상 출력:**
-```
-[LOGIN] 김정욱
-=== 검색 결과 ===
- [1] scheduleId=1 status=SCHEDULED
-=== 일정 상세 ===
- 항공편: KE001 / ICN -> NRT
- 출발/도착: 2026-05-01T09:30 / 2026-05-01T11:55
- 운임: class=Y refundable=true changeFee=30000 penalty=100000
-[BOOK] 예약 개시: PNR=... state=Initiated
-[STATE] Initiated -> PendingPayment
-[PG] 승인 요청 amount=500000
-[STATE] PendingPayment -> Confirmed
-=== 예약 확정 ===
- PNR : ...
- 상태: Confirmed
- 결제: PAID / 500000 KRW
-```
-
-### <span style="color:red">0.4 Swing UI 앱 실행 (SwingApp.main)</span>
-
-```bash
+cd KoreanAirReservationDomain
 java -cp bin com.koreanair.reservation.app.swing.SwingApp
 ```
 
-**UI 화면 순서:**
-1. **LoginPanel** — 회원번호 `SKY-000-001`, 비밀번호 `pw-stub` 입력 (샘플 로그인)
-2. **SearchPanel** — 출발 `ICN`, 도착 `NRT`, 일자 `2026-05-01` 입력 후 검색
-3. **PassengerPanel** — 이름/여권/생년월일 입력
-4. **PaymentPanel** — 결제 (항상 성공, mock gateway)
-5. **ConfirmationPanel** — PNR과 Confirmed 상태 확인
+### <span style="color:red">0.2 화면 순서</span>
 
-> **회원가입 시:** LoginPanel의 "회원가입" 버튼 → RegistrationDialog에서 정보 입력 → 저장 후 로그인
+| 순서 | 화면 | 입력 내용 |
+|------|------|----------|
+| 1 | LoginPanel | 회원번호 `SKY-000-001`, 비밀번호 `pw-stub` (샘플 로그인) |
+| 2 | SearchPanel | 출발 `ICN`, 도착 `NRT`, 일자 `2026-05-01` → 검색 |
+| 3 | PassengerPanel | 이름/여권/생년월일 입력 |
+| 4 | PaymentPanel | 결제 (mock gateway 항상 성공) |
+| 5 | ConfirmationPanel | PNR + `Confirmed` 상태 확인 |
 
-### <span style="color:red">0.5 시연 체크리스트</span>
-
-| # | 확인 항목 |预期 결과 |
-|---|----------|----------|
-| 1 | 콘솔 App 실행 | `[STATE] Initiated -> PendingPayment` 출력 |
-| 2 | 콘솔 App 결제 완료 | `[STATE] PendingPayment -> Confirmed` 출력 |
-| 3 | Swing LoginPanel | "회원가입" 버튼 + 샘플 정보 pre-filled |
-| 4 | Swing RegistrationDialog | 이름/이메일/회원번호/비밀번호 입력 → 저장 |
-| 5 | Swing SearchPanel 검색 | `ICN → NRT` 검색 결과 1건 표시 |
-| 6 | Swing StateBadge | 화면 상단 배지에서 상태 변화 확인 |
-| 7 | Swing ConfirmationPanel | PNR + Confirmed 상태 표시 |
+> **회원가입:** LoginPanel의 "회원가입" 버튼 → RegistrationDialog에서 정보 입력
 
 ---
 
