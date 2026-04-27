@@ -8,11 +8,13 @@ import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import com.koreanair.reservation.control.AuthService;
 import com.koreanair.reservation.domain.user.Member;
@@ -30,6 +32,7 @@ public class LoginPanel extends JPanel {
     private final JPasswordField passwordField = new JPasswordField(18);
     private final JLabel messageLabel = new JLabel(" ");
     private final JButton loginButton = new JButton("로그인");
+    private final JButton registerButton = new JButton("회원가입");
 
     private final MainFrame frame;
     private final AuthService authService;
@@ -69,12 +72,18 @@ public class LoginPanel extends JPanel {
         form.add(passwordField, c);
         passwordField.setText("pw-stub");
 
-        c.gridy = 3; c.gridx = 0; c.gridwidth = 2;
+        c.gridy = 3; c.gridx = 0;
         c.anchor = GridBagConstraints.CENTER;
-        loginButton.setPreferredSize(new Dimension(160, 36));
+        c.gridwidth = 2;
+        loginButton.setPreferredSize(new Dimension(120, 36));
         form.add(loginButton, c);
 
         c.gridy = 4;
+        registerButton.setPreferredSize(new Dimension(120, 34));
+        registerButton.setContentAreaFilled(false);
+        form.add(registerButton, c);
+
+        c.gridy = 5;
         messageLabel.setForeground(new java.awt.Color(0xD32F2F));
         form.add(messageLabel, c);
 
@@ -86,6 +95,12 @@ public class LoginPanel extends JPanel {
         hint.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
         hint.setForeground(new java.awt.Color(0x757575));
         add(hint, BorderLayout.SOUTH);
+
+        registerButton.addActionListener(e -> {
+            RegistrationDialog dialog = new RegistrationDialog(
+                    (JDialog) SwingUtilities.getWindowAncestor(this), authService);
+            dialog.setVisible(true);
+        });
     }
 
     private void wireEvents() {

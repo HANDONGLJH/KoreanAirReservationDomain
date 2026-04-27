@@ -14,6 +14,10 @@ public class Member extends User {
         return memberNumber;
     }
 
+    public void setMemberNumber(String memberNumber) {
+        this.memberNumber = memberNumber;
+    }
+
     public List<Reservation> getReservations() {
         return reservations;
     }
