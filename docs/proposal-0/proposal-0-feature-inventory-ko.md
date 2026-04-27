@@ -65,27 +65,19 @@ language: ko
 
 ## <span style="color:red">📌 0. 실행 방법 및 시연</span>
 
-> [!NOTE]
-> 🚀 **시연 준비** — 아래 명령어로 Swing UI를 실행한다.
+### <span style="color:red">0.1 컴파일</span>
 
-### <span style="color:red">0.1 Swing UI 실행</span>
+```bash
+cd KoreanAirReservationDomain
+javac -sourcepath src -d bin $(find src -name "*.java" | grep -v "tools/")
+```
+
+### <span style="color:red">0.2 실행</span>
 
 ```bash
 cd KoreanAirReservationDomain
 java -cp bin com.koreanair.reservation.app.swing.SwingApp
 ```
-
-### <span style="color:red">0.2 화면 순서</span>
-
-| 순서 | 화면 | 입력 내용 |
-|------|------|----------|
-| 1 | LoginPanel | 회원번호 `SKY-000-001`, 비밀번호 `pw-stub` (샘플 로그인) |
-| 2 | SearchPanel | 출발 `ICN`, 도착 `NRT`, 일자 `2026-05-01` → 검색 |
-| 3 | PassengerPanel | 이름/여권/생년월일 입력 |
-| 4 | PaymentPanel | 결제 (mock gateway 항상 성공) |
-| 5 | ConfirmationPanel | PNR + `Confirmed` 상태 확인 |
-
-> **회원가입:** LoginPanel의 "회원가입" 버튼 → RegistrationDialog에서 정보 입력
 
 ---
 
