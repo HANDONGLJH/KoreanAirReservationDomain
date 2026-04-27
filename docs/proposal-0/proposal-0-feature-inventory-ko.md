@@ -42,7 +42,7 @@ language: ko
 
 | | 섹션 | 채운 내용 |
 | :---: | :--- | :--- |
-| ✨ | **1번 시스템과 팀** | 시스템 제목 · 소스 베이스라인(`KoreanAirReservationDomain` Eclipse 프로젝트) · ECB 계층별 팀 분담 |
+| ✨ | **1번 시스템과 팀** | 시스템 범위 · 사용자 유형 · Java 데스크톱 앱 구조 · ECB 계층별 팀 분담 |
 | ✏️ | **2번 표 헤더 + 분포 근거** | `i` → `구현 iteration (1/2/3/4)` 라벨 명확화, iteration 분배 논리 추가 |
 | 💡 | **3번 채택 근거** | 각 패턴이 *왜* 그 iteration에 필요한지 (shotgun surgery, OCP 등 설계 원칙 언어로) |
 | 🎨 | **5번 UML 4종** | Use Case · Class (속성·연산 풀) · Sequence · State (Mermaid 자동 생성) |
@@ -69,21 +69,43 @@ language: ko
 
 ### <span style="color:red">1.1 시스템</span>
 
-<span style="color:red">본 제안은 **대한항공 Skypass 티켓 예약 시스템**을 대상으로 한다. 이는 설계프로젝트 #1에서 만든 UML 모델을 자바 데스크톱 애플리케이션으로 구현하고, 반복적으로 정제해 나가는 프로젝트다. 한 건의 항공권 예약을 둘러싼 고객 여정 전체 — 항공편 검색, 직항 선택, 승객 정보 입력, 운임 규칙 검증, 외부 게이트웨이를 통한 결제, 전자 항공권 발권, 그리고 이후 iteration에서 다룰 예약 취소 및 환불 처리 — 를 모두 지원한다.</span>
+<span style="color:red">본 제안은 **대한항공 Skypass 티켓 예약 시스템**을 대상으로 한다. 설계프로젝트 #1에서 만든 UML 모델을 Java 데스크톱 애플리케이션으로 구현하고, 4번의 iteration을 통해 점진적으로 정제한다.</span>
 
-<span style="color:red">사용자 그룹은 둘이다. Skypass 회원은 자신의 Skypass 번호와 (추후 도입될) 해시 비밀번호로 인증하며, 로그인 후에는 본인의 예약 이력을 조회할 수 있고 iteration 3부터는 누적 마일리지를 운임에 적용할 수 있다. 비회원(Guest) 사용자는 로그인하지 않으며, 예약 조회 시점에 PNR + 이름 + 이메일 세 항목으로 본인을 확인한다. 이런 분리 때문에 iteration 1의 인증 표면(authentication surface)은 작고, iteration 2에서 비로소 확장된다 — State 패턴이 예약 생애주기를 안정화한 다음에야 비회원 검증과 회원 프로필 같은 부가 기능에 손을 대도록 의도적으로 일정을 잡았기 때문이다.</span>
+```mermaid
+flowchart LR
+    Guest((비회원))
+    Member((Skypass 회원))
 
-<span style="color:red">웹 애플리케이션이 아니라 데스크톱 애플리케이션을 의도적으로 선택했다. 시러버스의 "the result should be developed using Java application (not Web)" 제약을 충족하면서, Boundary 계층은 Swing UI를 중심으로 구성하고 개발 및 시연 편의를 위해 콘솔 프런트엔드도 병행한다.</span>
+    subgraph App[Java 데스크톱 애플리케이션]
+        UI["Boundary<br/>Swing UI / Console UI"]
+        Control["Control<br/>Booking · Auth · Payment"]
+        Domain["Entity<br/>Reservation · Flight · Passenger · Payment"]
+    end
 
-### <span style="color:red">1.2 소스 베이스라인</span>
+    Payment[(외부 결제 게이트웨이)]
+    Skypass[(Skypass 시스템)]
 
-<span style="color:red">구현체는 Eclipse 자바 프로젝트 `KoreanAirReservationDomain`에 위치한다. 본 제출 시점 기준으로 자바 소스 69개가 11개 패키지에 정리되어 있다 (자세한 구성은 6.2). 5의 4종 UML 다이어그램은 손으로 그린 것이 아니라, `com.koreanair.reservation.tools` 패키지의 AmaterasUML 에미터 클래스 — `GenerateUseCaseDiagram`, `GenerateClassDiagram`, `GenerateSequenceDiagrams`, `GenerateStateDiagrams` — 가 소스 트리에서 AmaterasUML XML 파일을 자동 생성하고, 이것을 Eclipse에서 열어 PNG로 export한 결과물이다.</span>
+    Guest --> UI
+    Member --> UI
+    UI --> Control
+    Control --> Domain
+    Control --> Payment
+    Control --> Skypass
 
-<span style="color:red">다이어그램을 손으로 그리지 않고 소스에서 자동 생성하는 데에는 분명한 이유가 있다. iteration이 진행될수록 설계는 반복적으로 변하며, 클래스 다이어그램의 한 변경은 시퀀스 다이어그램(참여자가 클래스 메서드와 일치해야 함)과 상태 다이어그램(전이가 해당 엔티티의 메서드로 뒷받침되어야 함)으로 연쇄된다. 클래스 시그니처가 바뀔 때마다 4종 다이어그램을 손으로 다시 그리는 것은 느리고 오류도 많다. 에미터 패턴을 쓰면 단 한 번의 소스 변경이 한 번의 rebuild로 모든 종속 다이어그램에 전파된다 — "그림 그리기"보다는 "문서 컴파일"에 가깝다.</span>
+    Domain --> Search[항공편 검색]
+    Domain --> Booking[직항 선택 · 승객 정보 입력]
+    Domain --> Fare[운임 규칙 검증]
+    Domain --> Ticket[전자 항공권 발권]
+    Domain --> Refund[취소 · 환불 처리]
+```
 
-### <span style="color:red">1.3 A팀 (3명)</span>
+<span style="color:red">발표에서는 위 구조를 기준으로 설명한다. 사용자는 비회원과 Skypass 회원으로 나뉘고, Boundary 계층은 Swing UI와 콘솔 UI를 통해 같은 Control 계층에 연결된다. 핵심 도메인은 항공편 검색, 예약 진행, 운임 검증, 결제, 발권, 취소·환불로 이어지는 항공권 예약 생애주기다.</span>
 
-<span style="color:red">A팀은 설계프로젝트 #1 진행 중 1명이 중도 하차하여 현재 3인 체제로 운영 중이다. 작업 분담은 use case별로 나누지 않고(use case별 분담은 매 iteration마다 익숙치 않은 코드를 다시 학습하게 만들기 때문에 비효율적이다), ECB 계층별로 나누어 각 팀원이 프로젝트 전체 생애주기 동안 한 가지 횡단 관심사를 일관되게 책임지도록 한다.</span>
+<span style="color:red">웹 애플리케이션이 아니라 Java 데스크톱 애플리케이션을 선택한 이유는 시러버스의 "the result should be developed using Java application (not Web)" 제약을 충족하기 위해서다. 시연은 Swing UI를 중심으로 하되, 개발 및 검증 편의를 위해 콘솔 프런트엔드도 병행한다.</span>
+
+### <span style="color:red">1.2 A팀 (3명)</span>
+
+<span style="color:red">A팀은 현재 3인 체제로 운영 중이다. 작업 분담은 use case별로 나누지 않고(use case별 분담은 매 iteration마다 익숙치 않은 코드를 다시 학습하게 만들기 때문에 비효율적이다), ECB 계층별로 나누어 각 팀원이 프로젝트 전체 생애주기 동안 한 가지 횡단 관심사를 일관되게 책임지도록 한다.</span>
 
 | <span style="color:red">팀원</span> | <span style="color:red">담당 계층</span> | <span style="color:red">구체 책임 (전 iteration 공통)</span> |
 | --- | --- | --- |
