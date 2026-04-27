@@ -10,20 +10,27 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerDateModel;
 import javax.swing.SwingConstants;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 
@@ -32,9 +39,15 @@ import com.koreanair.reservation.domain.flight.FlightSchedule;
 
 public class SearchPanel extends JPanel {
 
-    private final JTextField fromField = new JTextField(6);
-    private final JTextField toField = new JTextField(6);
-    private final JTextField dateField = new JTextField(10);
+    private static final String[] AIRPORT_CODES = {
+        "ICN", "NRT", "HND", "FUK", "GMP",
+        "SIN", "BKK", "HKG", "PVG", "DEL",
+        "LAX", "JFK", "SYD", "CDG", "FRA"
+    };
+
+    private final JComboBox<String> fromCombo;
+    private final JComboBox<String> toCombo;
+    private final JSpinner dateSpinner;
     private final JButton searchButton = new JButton("검색");
     private final JButton nextButton = new JButton("다음 단계 →");
 
@@ -52,6 +65,15 @@ public class SearchPanel extends JPanel {
         this.booking = booking;
         this.ui = ui;
         setBackground(ModernUI.BACKGROUND);
+
+        fromCombo = new JComboBox<>(AIRPORT_CODES);
+        toCombo = new JComboBox<>(AIRPORT_CODES);
+
+        SpinnerDateModel dateModel = new SpinnerDateModel();
+        dateModel.setValue(Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        dateSpinner = new JSpinner(dateModel);
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dateSpinner, "yyyy-MM-dd");
+        dateSpinner.setEditor(dateEditor);
 
         buildSearchBar();
         buildCardList();
@@ -74,9 +96,13 @@ public class SearchPanel extends JPanel {
 
         c.gridx = 1;
         c.weightx = 0.25;
-        fromField.setText("ICN");
-        ModernUI.styleSearchField(fromField);
-        JPanel fromWrap = wrapField(fromField, "출발 공항");
+        fromCombo.setFont(ModernUI.FONT_BODY);
+        fromCombo.setBackground(Color.WHITE);
+        fromCombo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(ModernUI.BORDER, 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        fromCombo.setFocusable(false);
+        JPanel fromWrap = wrapCombo(fromCombo, "출발 공항");
         searchBar.add(fromWrap, c);
 
         JLabel arrow = new JLabel("→", SwingConstants.CENTER);
@@ -87,9 +113,14 @@ public class SearchPanel extends JPanel {
 
         c.gridx = 3;
         c.weightx = 0.25;
-        toField.setText("NRT");
-        ModernUI.styleSearchField(toField);
-        JPanel toWrap = wrapField(toField, "도착 공항");
+        toCombo.setFont(ModernUI.FONT_BODY);
+        toCombo.setBackground(Color.WHITE);
+        toCombo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(ModernUI.BORDER, 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        toCombo.setFocusable(false);
+        toCombo.setSelectedItem("NRT");
+        JPanel toWrap = wrapCombo(toCombo, "도착 공항");
         searchBar.add(toWrap, c);
 
         JLabel divider = new JLabel("|", SwingConstants.CENTER);
@@ -100,9 +131,14 @@ public class SearchPanel extends JPanel {
 
         c.gridx = 5;
         c.weightx = 0.2;
-        dateField.setText("2026-05-01");
-        ModernUI.styleSearchField(dateField);
-        JPanel dateWrap = wrapField(dateField, "날짜");
+        dateSpinner.setFont(ModernUI.FONT_BODY);
+        dateSpinner.setBackground(Color.WHITE);
+        dateSpinner.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(ModernUI.BORDER, 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        JComponent dateEditorComponent = dateSpinner.getEditor();
+        dateEditorComponent.setBackground(Color.WHITE);
+        JPanel dateWrap = wrapSpinner(dateSpinner, "날짜");
         searchBar.add(dateWrap, c);
 
         c.gridx = 6;
@@ -114,10 +150,21 @@ public class SearchPanel extends JPanel {
         add(searchBar, BorderLayout.NORTH);
     }
 
-    private JPanel wrapField(JTextField field, String placeholder) {
+    private JPanel wrapCombo(JComboBox<String> combo, String placeholder) {
         JPanel wrap = new JPanel(new BorderLayout());
         wrap.setBackground(ModernUI.CARD_BG);
-        wrap.add(field, BorderLayout.CENTER);
+        wrap.add(combo, BorderLayout.CENTER);
+        JLabel ph = new JLabel(placeholder, SwingConstants.CENTER);
+        ph.setFont(ModernUI.FONT_SMALL);
+        ph.setForeground(ModernUI.TEXT_SECONDARY);
+        ph.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
+        return wrap;
+    }
+
+    private JPanel wrapSpinner(JSpinner spinner, String placeholder) {
+        JPanel wrap = new JPanel(new BorderLayout());
+        wrap.setBackground(ModernUI.CARD_BG);
+        wrap.add(spinner, BorderLayout.CENTER);
         JLabel ph = new JLabel(placeholder, SwingConstants.CENTER);
         ph.setFont(ModernUI.FONT_SMALL);
         ph.setForeground(ModernUI.TEXT_SECONDARY);
@@ -162,21 +209,37 @@ public class SearchPanel extends JPanel {
         hint.setForeground(ModernUI.TEXT_SECONDARY);
         leftHint.add(hint);
 
-        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 8));
+        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         rightBtns.setBackground(ModernUI.CARD_BG);
+        rightBtns.setOpaque(true);
 
         JButton detailBtn = new JButton("상세 보기");
-        ModernUI.styleButtonSecondary(detailBtn);
+        detailBtn.setFont(ModernUI.FONT_BODY);
+        detailBtn.setForeground(ModernUI.PRIMARY);
+        detailBtn.setBackground(Color.WHITE);
+        detailBtn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(ModernUI.PRIMARY, 1),
+                BorderFactory.createEmptyBorder(10, 20, 10, 20)));
+        detailBtn.setFocusPainted(false);
+        detailBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        detailBtn.setOpaque(true);
         detailBtn.addActionListener(e -> showSelectedDetail());
         rightBtns.add(detailBtn);
 
-        ModernUI.styleButton(nextButton);
+        nextButton.setFont(ModernUI.FONT_BODY);
+        nextButton.setForeground(Color.WHITE);
+        nextButton.setBackground(ModernUI.PRIMARY);
+        nextButton.setBorder(BorderFactory.createEmptyBorder(10, 24, 10, 24));
+        nextButton.setFocusPainted(false);
+        nextButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        nextButton.setOpaque(true);
         nextButton.addActionListener(e -> proceedWithSelection());
         rightBtns.add(nextButton);
 
         footer.add(leftHint, BorderLayout.WEST);
         footer.add(rightBtns, BorderLayout.EAST);
-        footer.setPreferredSize(new Dimension(0, 54));
+        footer.setPreferredSize(new Dimension(0, 52));
+        footer.setOpaque(true);
         add(footer, BorderLayout.SOUTH);
     }
 
@@ -186,23 +249,16 @@ public class SearchPanel extends JPanel {
     }
 
     private void doSearch() {
-        String dateText = dateField.getText().trim();
-        if (dateText.isEmpty()) {
-            loadAllSchedules();
-            return;
-        }
-        try {
-            LocalDate date = LocalDate.parse(dateText);
-            String from = fromField.getText().trim().toUpperCase();
-            String to = toField.getText().trim().toUpperCase();
-            List<FlightSchedule> results = booking.processSearch(from, to, date);
-            currentResults = results != null ? results : new ArrayList<>();
-            refreshCardList();
-            if (currentResults.isEmpty()) {
-                ui.displayError("검색 결과가 없습니다.");
-            }
-        } catch (Exception ex) {
-            ui.displayError("입력 형식이 올바르지 않습니다. 예: 2026-05-01");
+        Date selectedDate = (Date) dateSpinner.getValue();
+        LocalDate date = selectedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        String from = (String) fromCombo.getSelectedItem();
+        String to = (String) toCombo.getSelectedItem();
+
+        List<FlightSchedule> results = booking.processSearch(from, to, date);
+        currentResults = results != null ? results : new ArrayList<>();
+        refreshCardList();
+        if (currentResults.isEmpty()) {
+            ui.displayError("검색 결과가 없습니다.");
         }
     }
 
