@@ -43,7 +43,7 @@ language: ko
 | | 섹션 | 채운 내용 |
 | :---: | :--- | :--- |
 | ✨ | **1번 시스템과 팀** | 시스템 범위 · 사용자 유형 · Java 데스크톱 앱 구조 · ECB 계층별 팀 분담 |
-| ✏️ | **2번 표 헤더 + 분포 근거** | `i` → `구현 iteration (1/2/3/4)` 라벨 명확화, iteration 분배 논리 추가 |
+| ✏️ | **2번 Feature Inventory** | 전체 기능 목록 제시 후 iteration별 inventory로 필터링하여 구현 순서 설명 |
 | 💡 | **3번 채택 근거** | 각 패턴이 *왜* 그 iteration에 필요한지 (shotgun surgery, OCP 등 설계 원칙 언어로) |
 | 🎨 | **5번 UML 4종** | Use Case · Class (속성·연산 풀) · Sequence · State (Mermaid 자동 생성) |
 | 🚀 | **6번 Iteration 1 구현** | Walking Skeleton 8단계 · 11개 패키지 · State 패턴 3단 위임 구조 · 핵심 클래스 표 · 의도적 한계 4건 |
@@ -127,6 +127,10 @@ flowchart LR
 
 > <span style="color:red">**헤더 라벨 변경.** 아래 표 3번째 컬럼을 `i` 에서 `구현 iteration (1 / 2 / 3 / 4)`로 풀어 표기한다 — 인쇄본에서 의미 모호성 제거. 행 데이터는 변경 없음.</span>
 
+### <span style="color:red">2.1 전체 Feature Inventory</span>
+
+<span style="color:red">먼저 전체 기능 목록을 한 번에 보여준다. 이 표의 목적은 시스템 범위를 빠짐없이 보여주는 것이고, 세 번째 컬럼의 iteration 번호는 뒤에서 필터링할 기준값으로 사용한다.</span>
+
 | Category | Sub-feature | <span style="color:red">구현 iteration (1 / 2 / 3 / 4)</span> |
 | --- | --- | --- |
 | Authentication | Member registration | 1 |
@@ -164,7 +168,65 @@ flowchart LR
 | Options and Settings | Font family and size change | 4 |
 |  | Language and currency unit change | 4 |
 
-> <span style="color:red">**분포 근거 (신규 추가).** 위 기능-iteration 매핑은 임의가 아니다. iteration 1은 State 패턴의 happy path를 구동하는 8개 기능 — 회원 가입, 로그인, 검색, 직항 선택, 일정 상세, 승객 입력, 운임 검증, 결제 처리 — 을 묶는다. iteration 2는 취소·환불 클러스터를 추가하는데, 운임 클래스(Y/Q/M/B/H)별로 세 가지 환불 정책(환불 불가, 부분 환불, 전액 환불)이 분기되므로 Strategy 패턴이 자연스럽게 들어맞는다. iteration 3는 비동기·환승 기능 — 결제 실패 시 자동 취소, 마일리지 적용, multi-city 일정 — 을 흡수한다. 이 기능들은 Observer를 통한 알림 전파와 layover 검증 알고리즘을 요구한다. iteration 4는 관리자 기능, e-티켓 PDF 및 실시간 추적, 전역 설정으로 마무리한다. 전역 설정은 Singleton의 교과서적 사례이고, `Itinerary` 생성에서는 Factory Method가 자연스럽게 도입된다. 이렇게 각 iteration은 하나의 주축 패턴을 중심에 두며, Feature Inventory는 코드 작성 이전에 그 정렬을 명시적으로 보여준다.</span>
+### <span style="color:red">2.2 Iteration별 Inventory</span>
+
+<span style="color:red">다음으로 같은 목록을 iteration별로 필터링해서 설명한다. 발표 흐름은 "전체 범위 확인 → 이번 iteration에서 실제 구현할 묶음 확인 → 다음 iteration으로 확장" 순서다.</span>
+
+#### <span style="color:red">Iteration 1 Inventory - Walking Skeleton / State</span>
+
+| <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
+| --- | --- | --- |
+| <span style="color:red">Authentication</span> | <span style="color:red">Member registration</span> | <span style="color:red">샘플 Skypass 회원을 등록해 로그인 흐름의 시작점을 만든다.</span> |
+| <span style="color:red">Authentication</span> | <span style="color:red">Login / Logout (Skypass 회원)</span> | <span style="color:red">사용자를 식별하고 예약 진행 주체를 확정한다.</span> |
+| <span style="color:red">Flight Search and Selection</span> | <span style="color:red">Flight search</span> | <span style="color:red">예약 happy path의 첫 Boundary-Control 연결이다.</span> |
+| <span style="color:red">Flight Search and Selection</span> | <span style="color:red">Itinerary detail display</span> | <span style="color:red">선택한 항공편의 운임·좌석·수수료 정보를 확인한다.</span> |
+| <span style="color:red">Flight Search and Selection</span> | <span style="color:red">Direct-flight selection</span> | <span style="color:red">iteration 1은 가장 단순한 직항 예약만 대상으로 한다.</span> |
+| <span style="color:red">Booking Flow</span> | <span style="color:red">Passenger info entry</span> | <span style="color:red">`Initiated → PendingPayment` State 전이를 발생시킨다.</span> |
+| <span style="color:red">Booking Flow</span> | <span style="color:red">Fare validation</span> | <span style="color:red">결제 전 운임 규칙을 검증한다.</span> |
+| <span style="color:red">Booking Flow</span> | <span style="color:red">Payment processing</span> | <span style="color:red">`PendingPayment → Confirmed` State 전이를 발생시킨다.</span> |
+
+#### <span style="color:red">Iteration 2 Inventory - Lookup / Cancellation / Strategy</span>
+
+| <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
+| --- | --- | --- |
+| <span style="color:red">Authentication</span> | <span style="color:red">Member profile and mileage balance lookup</span> | <span style="color:red">로그인 이후 회원 정보 조회 범위를 넓힌다.</span> |
+| <span style="color:red">Authentication</span> | <span style="color:red">Guest verification</span> | <span style="color:red">비회원도 PNR + 이름 + 이메일로 예약을 조회할 수 있게 한다.</span> |
+| <span style="color:red">Booking Flow</span> | <span style="color:red">Seat selection</span> | <span style="color:red">예약 확정 전에 좌석 선택 단계를 추가한다.</span> |
+| <span style="color:red">Reservation Lookup</span> | <span style="color:red">Member reservation lookup</span> | <span style="color:red">회원의 예약 이력을 조회한다.</span> |
+| <span style="color:red">Reservation Lookup</span> | <span style="color:red">Guest reservation lookup</span> | <span style="color:red">검증된 비회원의 단건 예약 조회를 지원한다.</span> |
+| <span style="color:red">Cancellation and Refund</span> | <span style="color:red">Cancellation request intake</span> | <span style="color:red">Confirmed / Ticketed 상태에서만 취소 요청을 받는다.</span> |
+| <span style="color:red">Cancellation and Refund</span> | <span style="color:red">Fare-rule-based refundability check</span> | <span style="color:red">운임 규칙에 따라 환불 가능 여부를 판단한다.</span> |
+| <span style="color:red">Cancellation and Refund</span> | <span style="color:red">Refund policy selection</span> | <span style="color:red">Strategy 패턴으로 환불 정책을 선택한다.</span> |
+| <span style="color:red">Cancellation and Refund</span> | <span style="color:red">Automatic refund processing</span> | <span style="color:red">선택된 Strategy로 환불 금액과 처리를 계산한다.</span> |
+| <span style="color:red">Cancellation and Refund</span> | <span style="color:red">Refund disbursement</span> | <span style="color:red">결제 게이트웨이를 통해 환불 지급을 연결한다.</span> |
+| <span style="color:red">e-Ticket</span> | <span style="color:red">e-Ticket issuance</span> | <span style="color:red">PNR 생성과 발권 상태를 연결한다.</span> |
+
+#### <span style="color:red">Iteration 3 Inventory - Async / Mileage / Observer</span>
+
+| <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
+| --- | --- | --- |
+| <span style="color:red">Flight Search and Selection</span> | <span style="color:red">Connecting-flight selection with layover validation</span> | <span style="color:red">환승 대기 시간 검증이 필요한 복합 일정으로 확장한다.</span> |
+| <span style="color:red">Flight Search and Selection</span> | <span style="color:red">Multi-city itinerary composition</span> | <span style="color:red">여러 구간을 조합하는 일정 생성 흐름을 추가한다.</span> |
+| <span style="color:red">Booking Flow</span> | <span style="color:red">15-minute seat hold management</span> | <span style="color:red">예약 중 좌석 임시 점유와 만료 이벤트를 다룬다.</span> |
+| <span style="color:red">Booking Flow</span> | <span style="color:red">Mileage application</span> | <span style="color:red">회원 마일리지를 운임에 적용한다.</span> |
+| <span style="color:red">Booking Flow</span> | <span style="color:red">Auto-cancel on payment failure</span> | <span style="color:red">결제 실패 이벤트가 예약 취소로 전파된다.</span> |
+| <span style="color:red">Mileage</span> | <span style="color:red">Mileage balance lookup</span> | <span style="color:red">마일리지 적용 전 잔액을 조회한다.</span> |
+| <span style="color:red">Mileage</span> | <span style="color:red">Partial or full mileage redemption</span> | <span style="color:red">부분 또는 전체 마일리지 사용을 지원한다.</span> |
+| <span style="color:red">Mileage</span> | <span style="color:red">Real-time Skypass System verification</span> | <span style="color:red">외부 Skypass 시스템 검증을 연결한다.</span> |
+| <span style="color:red">Connecting and Multi-city</span> | <span style="color:red">Through-check-in for baggage on connections</span> | <span style="color:red">환승 여정의 수하물 연결 조건을 확인한다.</span> |
+| <span style="color:red">Connecting and Multi-city</span> | <span style="color:red">Independent fare calculation per segment</span> | <span style="color:red">multi-city 구간별 독립 운임 계산을 수행한다.</span> |
+
+#### <span style="color:red">Iteration 4 Inventory - Final Polish / Singleton / Factory Method</span>
+
+| <span style="color:red">Category</span> | <span style="color:red">Sub-feature</span> | <span style="color:red">발표 포인트</span> |
+| --- | --- | --- |
+| <span style="color:red">Cancellation and Refund</span> | <span style="color:red">Exceptional refund admin review</span> | <span style="color:red">자동 처리 밖의 예외 환불을 관리자 검토로 넘긴다.</span> |
+| <span style="color:red">e-Ticket</span> | <span style="color:red">e-Ticket PDF download</span> | <span style="color:red">발권 결과물을 PDF로 내려받는다.</span> |
+| <span style="color:red">e-Ticket</span> | <span style="color:red">Real-time reservation status tracking</span> | <span style="color:red">예약 상태를 사용자에게 실시간으로 보여준다.</span> |
+| <span style="color:red">Options and Settings</span> | <span style="color:red">Font family and size change</span> | <span style="color:red">전역 UI 설정을 Singleton으로 관리한다.</span> |
+| <span style="color:red">Options and Settings</span> | <span style="color:red">Language and currency unit change</span> | <span style="color:red">언어·통화 단위 같은 전역 설정을 일관되게 반영한다.</span> |
+
+> <span style="color:red">**분포 근거 (신규 추가).** 위 기능-iteration 매핑은 임의가 아니다. iteration 1은 State 패턴의 happy path를 구동하는 최소 기능 묶음이고, iteration 2는 예약 조회와 취소·환불 클러스터를 추가하면서 Strategy 패턴을 도입한다. iteration 3는 결제 실패, 좌석 hold, 마일리지, 환승·multi-city처럼 이벤트 전파와 외부 검증이 필요한 기능을 묶어 Observer 적용 지점을 만든다. iteration 4는 관리자 예외 처리, PDF, 실시간 상태 추적, 전역 설정으로 마무리하며 Singleton과 선택적 Factory Method를 적용한다. 따라서 발표에서는 전체 표를 먼저 보여준 뒤, 네 개의 iteration inventory를 순서대로 넘기며 "왜 이 기능들이 같은 iteration에 묶였는지"를 설명한다.</span>
 
 ---
 
