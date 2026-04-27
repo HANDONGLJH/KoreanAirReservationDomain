@@ -525,13 +525,41 @@ classDiagram
 - <span style="color:red">State 패턴은 `InitiatedState`, `PendingPaymentState`, `ConfirmedState`, 결제 실패용 `CancelledState`만 보여준다.</span>
 - <span style="color:red">후속 iteration용 `RefundPolicy`, `GDSInterface`, `Itinerary`, `Segment`, 관리자 클래스는 제외했다.</span>
 
-### <span style="color:red">5.3 Sequence Diagram — Book Flight (Iteration 1 Happy Path)</span>
+### <span style="color:red">5.3 Sequence Diagram — Iteration 1 Happy Path</span>
 
-- <span style="color:red">본 다이어그램은 한 건의 happy path 예약을 추적한다.</span>
-- <span style="color:red">범위는 사용자의 검색 화면 첫 입력부터 확정 페이지 표시까지다.</span>
-- <span style="color:red">State 패턴을 운영 시점에서 보여주는 그림이다.</span>
-- <span style="color:red">`Reservation`의 생애주기 메서드는 모두 현재 `*State` 객체에 대한 다형 호출이다.</span>
-- <span style="color:red">두 번의 핵심 전이가 일어난다: `Initiated → PendingPayment`, `PendingPayment → Confirmed`.</span>
+- <span style="color:red">Iteration 1의 시연 흐름은 기능 카테고리 4개로 나뉜다.</span>
+- <span style="color:red">각 다이어그램은 ECB 계층 내에서의 호출 흐름을 보여준다.</span>
+- <span style="color:red">4개를 순서대로 이어 보면 전체 happy path가 된다.</span>
+
+#### <span style="color:red">5.3.1 Authentication</span>
+
+```mermaid
+sequenceDiagram
+    actor 사용자
+    participant UI as ReservationUI
+    participant BC as BookingController
+    participant AS as AuthService
+    participant M as Member
+
+    사용자->>UI: 회원 등록 요청
+    UI->>BC: registerSample(member, skypassNumber)
+    BC->>AS: registerSample(member, skypassNumber)
+    AS-->>BC: 등록 완료
+    BC-->>UI: 회원 등록 성공
+
+    사용자->>UI: 로그인 요청 (Skypass 번호, 비밀번호)
+    UI->>BC: login(skypassNumber, password)
+    BC->>AS: login(skypassNumber, password)
+    AS->>AS: memberBySkypass.get(skypassNumber)
+    AS-->>BC: Member
+    BC-->>UI: 로그인 성공 (currentMember)
+```
+
+- <span style="color:red">Iteration 1의 유일한 Actor는 Skypass 회원이다.</span>
+- <span style="color:red">비밀번호 검증은 iteration 2에서 salted-hash로 강화한다.</span>
+- <span style="color:red">비회원(Guest) 인증은 iteration 2에서 추가한다.</span>
+
+#### <span style="color:red">5.3.2 Flight Search & Selection</span>
 
 ```mermaid
 sequenceDiagram
@@ -539,30 +567,61 @@ sequenceDiagram
     participant UI as ReservationUI
     participant BC as BookingController
     participant FSS as FlightSearchService
-    participant PP as PaymentProcessor
-    participant R as Reservation
-    participant S as ReservationState
-    participant PG as PaymentGatewayInterface
-
-    Note over UI: Boundary
-    Note over BC,PP: Control
-    Note over R,S: Entity
+    participant FS as FlightSchedule
 
     사용자->>UI: 검색 조건 입력 (출발지, 도착지, 일자)
     UI->>BC: processSearch(from, to, date)
     BC->>FSS: search(from, to, date)
+    FSS->>FSS: 카탈로그에서 직항편 필터링
     FSS-->>BC: List~FlightSchedule~
     BC-->>UI: 항공편 목록
-    사용자->>UI: schedule 선택
+
+    사용자->>UI: 항공편 선택
     UI->>BC: initiateBooking(schedule)
-    BC->>R: new Reservation()
-    R->>S: currentState = new InitiatedState()
+    BC->>BC: 새 Reservation 생성 (InitiatedState)
     BC-->>UI: Reservation (state=Initiated)
-    사용자->>UI: 승객 정보 입력
+```
+
+- <span style="color:red">Iteration 1은 직항만 검색한다.</span>
+- <span style="color:red">환승·multi-city 검색은 iteration 3에서 추가한다.</span>
+- <span style="color:red">`FlightSearchService`는 조건 기반 필터링을 수행한다.</span>
+
+#### <span style="color:red">5.3.3 Booking Flow — 승객 정보 입력</span>
+
+```mermaid
+sequenceDiagram
+    actor 사용자
+    participant UI as ReservationUI
+    participant BC as BookingController
+    participant R as Reservation
+    participant S as ReservationState
+
+    사용자->>UI: 승객 정보 입력 (이름, 연락처, 여권번호)
     UI->>BC: setPassengerInfo(reservation, passenger)
     BC->>R: enterPassengerInfo(passenger)
     R->>S: InitiatedState.enterPassengerInfo(this)
     S->>R: setState(new PendingPaymentState())
+    Note over R,S: Initiated → PendingPayment
+    R-->>BC: 상태 전이 완료
+    BC-->>UI: 승객 정보 저장 완료
+```
+
+- <span style="color:red">State 패턴의 첫 번째 전이가 일어난다.</span>
+- <span style="color:red">`InitiatedState`가 `PendingPaymentState`로 전이한다.</span>
+- <span style="color:red">레거시 `ReservationStatus` enum도 함께 동기화된다.</span>
+
+#### <span style="color:red">5.3.4 Payment & Confirmation</span>
+
+```mermaid
+sequenceDiagram
+    actor 사용자
+    participant UI as ReservationUI
+    participant BC as BookingController
+    participant PP as PaymentProcessor
+    participant PG as MockPaymentGateway
+    participant R as Reservation
+    participant S as ReservationState
+
     사용자->>UI: 결제 확인
     UI->>BC: confirmPayment(reservation, fareRule, baseFare, tax)
     BC->>PP: validateFareRule(fareRule)
@@ -574,8 +633,14 @@ sequenceDiagram
     BC->>R: processPayment()
     R->>S: PendingPaymentState.processPayment(this)
     S->>R: setState(new ConfirmedState())
+    Note over R,S: PendingPayment → Confirmed
     BC-->>UI: 확정 화면 (PNR)
 ```
+
+- <span style="color:red">State 패턴의 두 번째 전이가 일어난다.</span>
+- <span style="color:red">`PendingPaymentState`가 `ConfirmedState`로 전이한다.</span>
+- <span style="color:red">`MockPaymentGateway`는 항상 승인을 반환한다.</span>
+- <span style="color:red">iteration 1의 happy path가 여기서 종료된다.</span>
 
 ### <span style="color:red">5.4 State Diagram — Iteration 1 Reservation</span>
 
