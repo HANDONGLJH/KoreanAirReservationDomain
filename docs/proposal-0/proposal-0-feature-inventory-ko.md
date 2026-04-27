@@ -109,9 +109,9 @@ flowchart LR
 
 | <span style="color:red">팀원</span> | <span style="color:red">담당 계층</span> | <span style="color:red">구체 책임 (전 iteration 공통)</span> |
 | --- | --- | --- |
-| <span style="color:red">김정욱</span> | <span style="color:red">도메인 & 패턴</span> | <span style="color:red">`Reservation` 애그리거트; State 패턴 (iter1); Strategy 환불 family (iter2); Observer (iter3); Singleton + Factory Method (iter4); AmaterasUML 에미터 클래스; 통합.</span> |
-| <span style="color:red">이재호</span> | <span style="color:red">Boundary</span> | <span style="color:red">Swing UI 패널 (`MainFrame`, `LoginPanel`, `SearchPanel`, `PassengerPanel`, `PaymentPanel`, `ConfirmationPanel`, `StateBadge`)과 `ConsoleReservationUI` 콘솔 프런트엔드.</span> |
-| <span style="color:red">김경동</span> | <span style="color:red">Control & 어댑터</span> | <span style="color:red">`PaymentProcessor`, `RefundHandler`, `PaymentGatewayInterface` 목 구현, `AuthService`, 그리고 4 iteration 전체를 보호하는 JUnit 스위트.</span> |
+| <span style="color:red">김정욱</span> | <span style="color:red">도메인 & 패턴</span> | <span style="color:red">1. `Reservation` 도메인 모델<br/>2. State 패턴 (iter1)<br/>3. Strategy 환불 family (iter2)<br/>4. Observer (iter3)<br/>5. Singleton + Factory Method (iter4)<br/>6. AmaterasUML 에미터 클래스<br/>7. 통합</span> |
+| <span style="color:red">이재호</span> | <span style="color:red">Boundary</span> | <span style="color:red">1. Swing UI 패널 (`MainFrame`, `LoginPanel`, `SearchPanel`, `PassengerPanel`, `PaymentPanel`, `ConfirmationPanel`, `StateBadge`)<br/>2. `ConsoleReservationUI` 콘솔 프런트엔드</span> |
+| <span style="color:red">김경동</span> | <span style="color:red">Control & 어댑터</span> | <span style="color:red">1. `PaymentProcessor`<br/>2. `RefundHandler`<br/>3. `PaymentGatewayInterface` 목 구현<br/>4. `AuthService`<br/>5. 4 iteration 전체를 보호하는 JUnit 스위트</span> |
 
 <span style="color:red">계층 단위 분담의 효과는 iteration 경계에서 가장 잘 드러난다. iteration 2의 리팩토링에서 환불 정책에 Strategy 패턴을 도입할 때, 변경은 도메인 계층(김정욱)과 control 계층(김경동)에 한정된다 — Boundary 계층(이재호)은 손댈 필요가 없다. 반대로 iteration 1에서 콘솔 UI를 Swing UI로 교체할 때 이재호가 자신의 파일만 수정하면 다른 두 사람과 diff 충돌을 조율할 필요가 없었다. 학생 팀 프로젝트에서 가장 빈번한 머지 충돌의 원인 — 인접한 use case 작업으로 두 사람이 같은 파일을 동시 수정하는 상황 — 을 계층 단위 분담으로 원천 차단한 셈이다.</span>
 
