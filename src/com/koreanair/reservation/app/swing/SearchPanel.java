@@ -4,29 +4,28 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import java.awt.Font;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 import com.koreanair.reservation.control.BookingController;
 import com.koreanair.reservation.domain.flight.FlightSchedule;
@@ -39,8 +38,8 @@ public class SearchPanel extends JPanel {
     private final JButton searchButton = new JButton("검색");
     private final JButton nextButton = new JButton("다음 단계 →");
 
-    private DefaultTableModel tableModel;
-    private JTable resultTable;
+    private final JPanel cardListPanel = new JPanel();
+    private final JScrollPane scrollPane = new JScrollPane();
 
     private final MainFrame frame;
     private final BookingController booking;
@@ -55,7 +54,7 @@ public class SearchPanel extends JPanel {
         setBackground(ModernUI.BACKGROUND);
 
         buildSearchBar();
-        buildTable();
+        buildCardList();
         buildFooter();
         loadAllSchedules();
     }
@@ -63,55 +62,53 @@ public class SearchPanel extends JPanel {
     private void buildSearchBar() {
         JPanel searchBar = new JPanel(new GridBagLayout());
         searchBar.setBackground(ModernUI.CARD_BG);
-        searchBar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(ModernUI.BORDER, 1),
-                BorderFactory.createEmptyBorder(20, 24, 20, 24)));
+        searchBar.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, ModernUI.BORDER));
         GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(4, 8, 4, 8);
+        c.insets = new Insets(8, 16, 8, 16);
         c.fill = GridBagConstraints.HORIZONTAL;
 
         JLabel logo = new JLabel("🔍", SwingConstants.CENTER);
-        logo.setFont(new Font("System", Font.PLAIN, 22));
+        logo.setFont(new Font("System", Font.PLAIN, 20));
         c.gridx = 0;
         searchBar.add(logo, c);
 
         c.gridx = 1;
-        c.weightx = 0.3;
+        c.weightx = 0.25;
         fromField.setText("ICN");
         ModernUI.styleSearchField(fromField);
         JPanel fromWrap = wrapField(fromField, "출발 공항");
         searchBar.add(fromWrap, c);
 
         JLabel arrow = new JLabel("→", SwingConstants.CENTER);
-        arrow.setFont(new Font("System", Font.BOLD, 18));
+        arrow.setFont(new Font("System", Font.BOLD, 16));
         arrow.setForeground(ModernUI.PRIMARY);
         c.gridx = 2;
         searchBar.add(arrow, c);
 
         c.gridx = 3;
-        c.weightx = 0.3;
+        c.weightx = 0.25;
         toField.setText("NRT");
         ModernUI.styleSearchField(toField);
         JPanel toWrap = wrapField(toField, "도착 공항");
         searchBar.add(toWrap, c);
 
         JLabel divider = new JLabel("|", SwingConstants.CENTER);
-        divider.setFont(new Font("System", Font.PLAIN, 18));
+        divider.setFont(new Font("System", Font.PLAIN, 16));
         divider.setForeground(ModernUI.BORDER);
         c.gridx = 4;
         searchBar.add(divider, c);
 
         c.gridx = 5;
-        c.weightx = 0.25;
+        c.weightx = 0.2;
         dateField.setText("2026-05-01");
         ModernUI.styleSearchField(dateField);
-        JPanel dateWrap = wrapField(dateField, "일자 (YYYY-MM-DD)");
+        JPanel dateWrap = wrapField(dateField, "날짜");
         searchBar.add(dateWrap, c);
 
         c.gridx = 6;
         c.weightx = 0.15;
         ModernUI.styleButton(searchButton);
-        searchButton.setPreferredSize(new Dimension(100, 42));
+        searchButton.setPreferredSize(new Dimension(90, 38));
         searchBar.add(searchButton, c);
 
         add(searchBar, BorderLayout.NORTH);
@@ -128,43 +125,27 @@ public class SearchPanel extends JPanel {
         return wrap;
     }
 
-    private void buildTable() {
-        tableModel = new DefaultTableModel(
-                new Object[] { "#", "항공편명", "노선", "출발", "도착", "상태" }, 0) {
+    private void buildCardList() {
+        cardListPanel.setLayout(new BoxLayout(cardListPanel, BoxLayout.Y_AXIS));
+        cardListPanel.setBackground(ModernUI.BACKGROUND);
+        cardListPanel.setOpaque(true);
+
+        scrollPane.setViewportView(cardListPanel);
+        scrollPane.setBackground(ModernUI.BACKGROUND);
+        scrollPane.setBorder(null);
+        scrollPane.getViewport().setBackground(ModernUI.BACKGROUND);
+        scrollPane.getViewport().setOpaque(true);
+        scrollPane.setOpaque(true);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
-        };
-        resultTable = new JTable(tableModel);
-        resultTable.setFont(ModernUI.FONT_BODY);
-        resultTable.setRowHeight(40);
-        resultTable.setGridColor(ModernUI.BORDER);
-        resultTable.setSelectionBackground(ModernUI.PRIMARY_LIGHT);
-        resultTable.setSelectionForeground(ModernUI.PRIMARY);
-        resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        resultTable.setShowGrid(true);
-        resultTable.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) proceedWithSelection();
+            protected void configureScrollBarColors() {
+                this.thumbColor = ModernUI.BORDER;
+                this.trackColor = ModernUI.BACKGROUND;
             }
         });
 
-        JTableHeader header = resultTable.getTableHeader();
-        header.setFont(ModernUI.FONT_SMALL);
-        header.setForeground(ModernUI.TEXT_SECONDARY);
-        header.setBackground(ModernUI.BACKGROUND);
-        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, ModernUI.BORDER));
-
-        DefaultTableCellRenderer center = new DefaultTableCellRenderer();
-        center.setHorizontalAlignment(SwingConstants.CENTER);
-        for (int i = 0; i < 6; i++) {
-            resultTable.getColumnModel().getColumn(i).setCellRenderer(center);
-        }
-
-        JScrollPane scroll = new JScrollPane(resultTable);
-        scroll.setBackground(ModernUI.CARD_BG);
-        scroll.setBorder(BorderFactory.createMatteBorder(0, 1, 1, 1, ModernUI.BORDER));
-        scroll.getViewport().setBackground(ModernUI.CARD_BG);
-        add(scroll, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
 
         searchButton.addActionListener(e -> doSearch());
     }
@@ -201,7 +182,7 @@ public class SearchPanel extends JPanel {
 
     private void loadAllSchedules() {
         currentResults = booking.getAllSchedules();
-        refreshTable();
+        refreshCardList();
     }
 
     private void doSearch() {
@@ -210,30 +191,35 @@ public class SearchPanel extends JPanel {
             loadAllSchedules();
             return;
         }
-        LocalDate date;
         try {
-            date = LocalDate.parse(dateText);
-        } catch (DateTimeParseException ex) {
-            ui.displayError("일자 형식이 올바르지 않습니다. 예: 2026-05-01");
-            return;
-        }
-        String from = fromField.getText().trim().toUpperCase();
-        String to = toField.getText().trim().toUpperCase();
-        List<FlightSchedule> results = booking.processSearch(from, to, date);
-        currentResults = results != null ? results : new ArrayList<>();
-        refreshTable();
-        if (currentResults.isEmpty()) {
-            ui.displayError("검색 결과가 없습니다.");
+            LocalDate date = LocalDate.parse(dateText);
+            String from = fromField.getText().trim().toUpperCase();
+            String to = toField.getText().trim().toUpperCase();
+            List<FlightSchedule> results = booking.processSearch(from, to, date);
+            currentResults = results != null ? results : new ArrayList<>();
+            refreshCardList();
+            if (currentResults.isEmpty()) {
+                ui.displayError("검색 결과가 없습니다.");
+            }
+        } catch (Exception ex) {
+            ui.displayError("입력 형식이 올바르지 않습니다. 예: 2026-05-01");
         }
     }
 
-    private void refreshTable() {
-        tableModel.setRowCount(0);
-        int i = 1;
-        for (FlightSchedule s : currentResults) {
-            tableModel.addRow(SwingReservationUI.toTableRow(i, s));
-            i++;
+    private void refreshCardList() {
+        cardListPanel.removeAll();
+
+        for (int i = 0; i < currentResults.size(); i++) {
+            FlightSchedule s = currentResults.get(i);
+            FlightCard card = new FlightCard(s, i + 1);
+            cardListPanel.add(card);
+            cardListPanel.add(Box.createVerticalStrut(10));
         }
+
+        cardListPanel.revalidate();
+        cardListPanel.repaint();
+        scrollPane.revalidate();
+        scrollPane.repaint();
     }
 
     private void proceedWithSelection() {
@@ -251,16 +237,213 @@ public class SearchPanel extends JPanel {
     }
 
     private FlightSchedule selectedSchedule() {
-        int row = resultTable.getSelectedRow();
-        if (row < 0) {
-            if (!currentResults.isEmpty()) {
-                row = 0;
-                resultTable.setRowSelectionInterval(0, 0);
-            } else {
-                ui.displayError("항공편을 선택하세요.");
-                return null;
-            }
+        if (currentResults.isEmpty()) {
+            ui.displayError("항공편을 선택하세요.");
+            return null;
         }
-        return currentResults.get(row);
+        return currentResults.get(0);
+    }
+
+    private class FlightCard extends JPanel {
+        private final FlightSchedule schedule;
+        private boolean isSelected = false;
+
+        FlightCard(FlightSchedule schedule, int index) {
+            super(new BorderLayout());
+            this.schedule = schedule;
+            setBackground(ModernUI.CARD_BG);
+            setOpaque(true);
+            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, ModernUI.BORDER));
+            setPreferredSize(new Dimension(0, 88));
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, 88));
+            setMinimumSize(new Dimension(0, 88));
+            setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    if (!isSelected) {
+                        setBackground(new Color(0xF8, 0xFA, 0xFC));
+                        repaintCard();
+                    }
+                }
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    if (!isSelected) {
+                        setBackground(ModernUI.CARD_BG);
+                        repaintCard();
+                    }
+                }
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    selectCard();
+                }
+            });
+
+            buildCard();
+        }
+
+        private void repaintCard() {
+            invalidate();
+            repaint();
+        }
+
+        private void buildCard() {
+            com.koreanair.reservation.domain.flight.Flight flight = schedule.getFlight();
+            String flightNum = flight != null ? flight.getFlightNumber() : "-";
+            String airline = "대한항공";
+
+            String fromCode = "-";
+            String toCode = "-";
+            String fromTime = "-";
+            String toTime = "-";
+            String duration = "-";
+
+            if (flight != null && flight.getRoute() != null) {
+                fromCode = flight.getRoute().getOrigin() != null
+                        ? flight.getRoute().getOrigin().getAirportCode() : fromCode;
+                toCode = flight.getRoute().getDestination() != null
+                        ? flight.getRoute().getDestination().getAirportCode() : toCode;
+            }
+
+            if (schedule.getDepartureDateTime() != null) {
+                fromTime = schedule.getDepartureDateTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+            }
+            if (schedule.getArrivalDateTime() != null) {
+                toTime = schedule.getArrivalDateTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+            }
+            if (schedule.getDepartureDateTime() != null && schedule.getArrivalDateTime() != null) {
+                long mins = ChronoUnit.MINUTES.between(
+                        schedule.getDepartureDateTime(), schedule.getArrivalDateTime());
+                long h = mins / 60;
+                long m = mins % 60;
+                duration = h > 0 ? h + "h " + m + "m" : m + "m";
+            }
+
+            setLayout(new BorderLayout());
+            setBackground(ModernUI.CARD_BG);
+
+            JPanel centerPanel = new JPanel();
+            centerPanel.setLayout(new GridBagLayout());
+            centerPanel.setBackground(ModernUI.CARD_BG);
+            centerPanel.setOpaque(true);
+            GridBagConstraints gc = new GridBagConstraints();
+            gc.insets = new Insets(0, 16, 0, 0);
+            gc.anchor = GridBagConstraints.WEST;
+            gc.fill = GridBagConstraints.VERTICAL;
+
+            gc.gridx = 0;
+            gc.gridy = 0;
+            gc.gridheight = 2;
+            JPanel airlinePanel = new JPanel();
+            airlinePanel.setLayout(new BoxLayout(airlinePanel, BoxLayout.Y_AXIS));
+            airlinePanel.setBackground(ModernUI.CARD_BG);
+            airlinePanel.setOpaque(true);
+            JLabel airlineLbl = new JLabel(airline);
+            airlineLbl.setFont(ModernUI.FONT_SMALL);
+            airlineLbl.setForeground(ModernUI.TEXT_SECONDARY);
+            JLabel flightNumLbl = new JLabel(flightNum);
+            flightNumLbl.setFont(new Font("System", Font.BOLD, 13));
+            flightNumLbl.setForeground(ModernUI.TEXT_PRIMARY);
+            airlinePanel.add(airlineLbl);
+            airlinePanel.add(flightNumLbl);
+            centerPanel.add(airlinePanel, gc);
+
+            gc.gridx = 1;
+            gc.gridheight = 1;
+            gc.insets = new Insets(0, 24, 0, 0);
+            JPanel depPanel = new JPanel();
+            depPanel.setLayout(new BoxLayout(depPanel, BoxLayout.Y_AXIS));
+            depPanel.setBackground(ModernUI.CARD_BG);
+            depPanel.setOpaque(true);
+            JLabel depTime = new JLabel(fromTime);
+            depTime.setFont(new Font("System", Font.BOLD, 22));
+            depTime.setForeground(ModernUI.TEXT_PRIMARY);
+            JLabel depCode = new JLabel(fromCode);
+            depCode.setFont(ModernUI.FONT_SMALL);
+            depCode.setForeground(ModernUI.TEXT_SECONDARY);
+            depPanel.add(depTime);
+            depPanel.add(depCode);
+            centerPanel.add(depPanel, gc);
+
+            gc.gridx = 2;
+            gc.gridheight = 2;
+            gc.insets = new Insets(0, 16, 0, 0);
+            JPanel durationPanel = new JPanel();
+            durationPanel.setLayout(new BoxLayout(durationPanel, BoxLayout.Y_AXIS));
+            durationPanel.setBackground(ModernUI.CARD_BG);
+            durationPanel.setOpaque(true);
+            JLabel durLabel = new JLabel(duration);
+            durLabel.setFont(ModernUI.FONT_SMALL);
+            durLabel.setForeground(ModernUI.TEXT_SECONDARY);
+            durLabel.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+            JLabel stopsLabel = new JLabel("직항");
+            stopsLabel.setFont(ModernUI.FONT_SMALL);
+            stopsLabel.setForeground(ModernUI.SUCCESS);
+            stopsLabel.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+            durationPanel.add(durLabel);
+            durationPanel.add(stopsLabel);
+            centerPanel.add(durationPanel, gc);
+
+            gc.gridx = 3;
+            gc.gridheight = 1;
+            gc.insets = new Insets(0, 16, 0, 0);
+            JPanel arrPanel = new JPanel();
+            arrPanel.setLayout(new BoxLayout(arrPanel, BoxLayout.Y_AXIS));
+            arrPanel.setBackground(ModernUI.CARD_BG);
+            arrPanel.setOpaque(true);
+            JLabel arrTime = new JLabel(toTime);
+            arrTime.setFont(new Font("System", Font.BOLD, 22));
+            arrTime.setForeground(ModernUI.TEXT_PRIMARY);
+            JLabel arrCode = new JLabel(toCode);
+            arrCode.setFont(ModernUI.FONT_SMALL);
+            arrCode.setForeground(ModernUI.TEXT_SECONDARY);
+            arrPanel.add(arrTime);
+            arrPanel.add(arrCode);
+            centerPanel.add(arrPanel, gc);
+
+            add(centerPanel, BorderLayout.CENTER);
+
+            JPanel pricePanel = new JPanel();
+            pricePanel.setLayout(new BoxLayout(pricePanel, BoxLayout.Y_AXIS));
+            pricePanel.setBackground(ModernUI.CARD_BG);
+            pricePanel.setOpaque(true);
+            pricePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 16));
+            JLabel priceLbl = new JLabel("450,000");
+            priceLbl.setFont(new Font("System", Font.BOLD, 20));
+            priceLbl.setForeground(ModernUI.PRIMARY);
+            JLabel currencyLbl = new JLabel("KRW");
+            currencyLbl.setFont(ModernUI.FONT_SMALL);
+            currencyLbl.setForeground(ModernUI.PRIMARY);
+            JLabel cabinLbl = new JLabel("이코노미");
+            cabinLbl.setFont(ModernUI.FONT_SMALL);
+            cabinLbl.setForeground(ModernUI.TEXT_SECONDARY);
+            pricePanel.add(priceLbl);
+            pricePanel.add(currencyLbl);
+            pricePanel.add(cabinLbl);
+
+            add(pricePanel, BorderLayout.EAST);
+        }
+
+        private void selectCard() {
+            for (java.awt.Component c : cardListPanel.getComponents()) {
+                if (c instanceof FlightCard) {
+                    ((FlightCard) c).setSelected(false);
+                }
+            }
+            setSelected(true);
+        }
+
+        private void setSelected(boolean selected) {
+            isSelected = selected;
+            if (selected) {
+                setBackground(ModernUI.PRIMARY_LIGHT);
+                setBorder(BorderFactory.createMatteBorder(2, 0, 2, 0, ModernUI.PRIMARY));
+            } else {
+                setBackground(ModernUI.CARD_BG);
+                setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, ModernUI.BORDER));
+            }
+            repaintCard();
+        }
     }
 }
