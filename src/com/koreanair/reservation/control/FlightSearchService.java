@@ -42,4 +42,8 @@ public class FlightSearchService {
         }
         return matches;
     }
+
+    public List<FlightSchedule> getCatalog() {
+        return catalog;
+    }
 }
