@@ -414,7 +414,7 @@ flowchart LR
 
 <div align="center">
 
-<img src="images/스크린샷 2026-04-27 오후 10.40.48.png" width="95%">
+<img src="./images/iter1-class-diagram.png" width="95%">
 
 <br>
 
