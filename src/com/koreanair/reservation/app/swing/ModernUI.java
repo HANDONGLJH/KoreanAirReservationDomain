@@ -4,16 +4,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Insets;
 
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.plaf.basic.BasicButtonUI;
-import javax.swing.plaf.basic.BasicTextFieldUI;
-import javax.swing.text.JTextComponent;
 
 public final class ModernUI {
 
@@ -55,16 +50,12 @@ public final class ModernUI {
         btn.setFont(FONT_BODY);
         btn.setForeground(Color.WHITE);
         btn.setBackground(PRIMARY);
-        btn.setBorder(BorderFactory.createEmptyBorder(12, 28, 12, 28));
+        btn.setBorder(BorderFactory.createEmptyBorder(14, 28, 14, 28));
         btn.setFocusPainted(false);
+        btn.setFocusable(false);
         btn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn.setUI(new BasicButtonUI() {
-            @Override
-            public void installUI(JComponent c) {
-                super.installUI(c);
-                ((JButton) c).setOpaque(false);
-            }
-        });
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
     }
 
     public static void styleButtonSecondary(JButton btn) {
@@ -75,7 +66,10 @@ public final class ModernUI {
                 BorderFactory.createLineBorder(PRIMARY, 1),
                 BorderFactory.createEmptyBorder(12, 28, 12, 28)));
         btn.setFocusPainted(false);
+        btn.setFocusable(false);
         btn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
     }
 
     public static void styleButtonSuccess(JButton btn) {
@@ -84,7 +78,10 @@ public final class ModernUI {
         btn.setBackground(SUCCESS);
         btn.setBorder(BorderFactory.createEmptyBorder(12, 28, 12, 28));
         btn.setFocusPainted(false);
+        btn.setFocusable(false);
         btn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
     }
 
     public static void styleLabel(JLabel label) {
@@ -126,5 +123,5 @@ public final class ModernUI {
                 BorderFactory.createEmptyBorder(24, 32, 24, 32)));
     }
 
-private ModernUI() {}
+    private ModernUI() {}
 }

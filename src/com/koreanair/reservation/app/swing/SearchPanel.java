@@ -214,25 +214,11 @@ public class SearchPanel extends JPanel {
         rightBtns.setOpaque(true);
 
         JButton detailBtn = new JButton("상세 보기");
-        detailBtn.setFont(ModernUI.FONT_BODY);
-        detailBtn.setForeground(ModernUI.PRIMARY);
-        detailBtn.setBackground(Color.WHITE);
-        detailBtn.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(ModernUI.PRIMARY, 1),
-                BorderFactory.createEmptyBorder(10, 20, 10, 20)));
-        detailBtn.setFocusPainted(false);
-        detailBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        detailBtn.setOpaque(true);
+        styleSolidButton(detailBtn, ModernUI.CARD_BG, ModernUI.PRIMARY, ModernUI.PRIMARY);
         detailBtn.addActionListener(e -> showSelectedDetail());
         rightBtns.add(detailBtn);
 
-        nextButton.setFont(ModernUI.FONT_BODY);
-        nextButton.setForeground(Color.WHITE);
-        nextButton.setBackground(ModernUI.PRIMARY);
-        nextButton.setBorder(BorderFactory.createEmptyBorder(10, 24, 10, 24));
-        nextButton.setFocusPainted(false);
-        nextButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        nextButton.setOpaque(true);
+        styleSolidButton(nextButton, ModernUI.PRIMARY, Color.WHITE, ModernUI.PRIMARY);
         nextButton.addActionListener(e -> proceedWithSelection());
         rightBtns.add(nextButton);
 
@@ -501,5 +487,19 @@ public class SearchPanel extends JPanel {
             }
             repaintCard();
         }
+    }
+
+    private void styleSolidButton(JButton btn, Color bg, Color fg, Color border) {
+        btn.setFont(ModernUI.FONT_BODY);
+        btn.setForeground(fg);
+        btn.setBackground(bg);
+        btn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(border, 1),
+                BorderFactory.createEmptyBorder(10, 20, 10, 20)));
+        btn.setFocusPainted(false);
+        btn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
+        btn.setFocusable(false);
     }
 }
