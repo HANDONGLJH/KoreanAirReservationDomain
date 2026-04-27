@@ -27,7 +27,7 @@ import com.koreanair.reservation.domain.user.Member;
 
 public class LoginPanel extends JPanel {
 
-    private final JTextField memberNumberField = new JTextField(20);
+    private final JTextField nameField = new JTextField(20);
     private final JPasswordField passwordField = new JPasswordField(20);
     private final JLabel messageLabel = new JLabel(" ");
     private final JButton loginButton = new JButton("로그인");
@@ -83,13 +83,12 @@ public class LoginPanel extends JPanel {
         c.gridwidth = 1;
         c.gridy = 3; c.gridx = 0;
         c.insets = new Insets(24, 0, 4, 8);
-        JLabel idLabel = createFieldLabel("회원번호 (Skypass)");
-        card.add(idLabel, c);
+        card.add(createFieldLabel("이름"), c);
         c.gridx = 1;
         c.insets = new Insets(24, 8, 4, 0);
-        styleTextField(memberNumberField);
-        memberNumberField.setText("SKY-000-001");
-        card.add(memberNumberField, c);
+        styleTextField(nameField);
+        nameField.setText("김정욱");
+        card.add(nameField, c);
 
         c.gridy = 4; c.gridx = 0;
         c.insets = new Insets(8, 0, 4, 8);
@@ -97,7 +96,7 @@ public class LoginPanel extends JPanel {
         c.gridx = 1;
         c.insets = new Insets(8, 8, 4, 0);
         styleTextField(passwordField);
-        passwordField.setText("pw-stub");
+        passwordField.setText("pw1234");
         card.add(passwordField, c);
 
         c.gridy = 5; c.gridx = 0; c.gridwidth = 2;
@@ -124,7 +123,7 @@ public class LoginPanel extends JPanel {
         c.gridy = 0;
         centerWrapper.add(card, c);
 
-        JLabel hint = new JLabel("샘플 회원번호: SKY-000-001 / 비밀번호: pw-stub", SwingConstants.CENTER);
+        JLabel hint = new JLabel("샘플 이름: 김정욱 / 비밀번호: pw1234", SwingConstants.CENTER);
         hint.setFont(ModernUI.FONT_SMALL);
         hint.setForeground(ModernUI.TEXT_SECONDARY);
         hint.setBorder(BorderFactory.createEmptyBorder(16, 0, 0, 0));
@@ -181,13 +180,13 @@ public class LoginPanel extends JPanel {
     }
 
     private void doLogin() {
-        String skypass = memberNumberField.getText().trim();
+        String name = nameField.getText().trim();
         String pw = new String(passwordField.getPassword());
-        if (skypass.isEmpty()) {
-            messageLabel.setText("회원번호를 입력해 주세요.");
+        if (name.isEmpty()) {
+            messageLabel.setText("이름을 입력해 주세요.");
             return;
         }
-        Member m = authService.login(skypass, pw);
+        Member m = authService.loginByName(name, pw);
         if (m == null) {
             messageLabel.setText("등록된 회원이 아닙니다. 회원가입을 해주세요.");
             return;
@@ -197,6 +196,6 @@ public class LoginPanel extends JPanel {
     }
 
     public void focusFirst() {
-        memberNumberField.requestFocusInWindow();
+        nameField.requestFocusInWindow();
     }
 }

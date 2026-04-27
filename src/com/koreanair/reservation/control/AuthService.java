@@ -14,11 +14,11 @@ import com.koreanair.reservation.domain.user.Member;
  */
 public class AuthService {
 
-    /** 샘플 회원 저장소 — 데모용. 실제로는 DB 조회. */
     private final Map<String, Member> memberBySkypass = new HashMap<>();
     private final Map<String, String> passwordBySkypass = new HashMap<>();
+    private final Map<String, Member> memberByName = new HashMap<>();
+    private int memberSequence = 4;
 
-    /** 현재 로그인 상태 — 단일 사용자 데모 한정. */
     private Member current;
 
     public AuthService() {
@@ -35,12 +35,28 @@ public class AuthService {
         }
         memberBySkypass.put(skypassNumber, member);
         passwordBySkypass.put(skypassNumber, password);
+        memberByName.put(member.getName(), member);
         return member;
     }
 
-    /**
-     * @return 성공 시 로그인된 회원, 실패 시 null (Iteration 2 에서 Exception 화).
-     */
+    public String generateSkypassNumber() {
+        return String.format("SKY-%03d-%03d", memberSequence / 1000, memberSequence % 1000);
+    }
+
+    public Member loginByName(String name, String password) {
+        Member m = memberByName.get(name);
+        if (m == null) {
+            return null;
+        }
+        String skypass = m.getMemberNumber();
+        String expectedPassword = passwordBySkypass.get(skypass);
+        if (!password.equals(expectedPassword)) {
+            return null;
+        }
+        this.current = m;
+        return m;
+    }
+
     public Member login(String skypassNumber, String passwordStub) {
         Member m = memberBySkypass.get(skypassNumber);
         if (m == null) {

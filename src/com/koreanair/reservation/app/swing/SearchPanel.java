@@ -102,12 +102,24 @@ public class SearchPanel extends JPanel {
         searchButton.addActionListener(e -> doSearch());
         detailButton.addActionListener(e -> showSelectedDetail());
         nextButton.addActionListener(e -> proceedWithSelection());
+
+        loadAllSchedules();
+    }
+
+    private void loadAllSchedules() {
+        currentResults = booking.getAllSchedules();
+        refreshTable();
     }
 
     private void doSearch() {
+        String dateText = dateField.getText().trim();
+        if (dateText.isEmpty()) {
+            loadAllSchedules();
+            return;
+        }
         LocalDate date;
         try {
-            date = LocalDate.parse(dateField.getText().trim());
+            date = LocalDate.parse(dateText);
         } catch (DateTimeParseException ex) {
             ui.displayError("일자 형식이 올바르지 않습니다. 예: 2026-05-01");
             return;

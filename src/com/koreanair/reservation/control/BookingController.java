@@ -114,6 +114,14 @@ public class BookingController {
         return flightSearch.search(fromAirportCode, toAirportCode, date);
     }
 
+    /** 전체 항공편 목록 조회 (초기 표시용). */
+    public List<FlightSchedule> getAllSchedules() {
+        if (flightSearch == null) {
+            return new ArrayList<>();
+        }
+        return flightSearch.getCatalog();
+    }
+
     /** 2) 선택된 flight 로 Reservation 생성 (Initiated 상태). */
     public Reservation initiateBooking(FlightSchedule selected) {
         if (selected == null || !selected.isAvailableForBooking()) {

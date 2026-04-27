@@ -25,7 +25,6 @@ public class RegistrationDialog extends JDialog {
 
     private final JTextField nameField = new JTextField(20);
     private final JTextField emailField = new JTextField(20);
-    private final JTextField memberNumberField = new JTextField(20);
     private final JPasswordField passwordField = new JPasswordField(20);
     private final JPasswordField confirmPasswordField = new JPasswordField(20);
     private final JLabel messageLabel = new JLabel(" ");
@@ -61,21 +60,18 @@ public class RegistrationDialog extends JDialog {
         c.gridy = 2; c.gridx = 0; form.add(new JLabel("이메일"), c);
         c.gridx = 1; form.add(emailField, c);
 
-        c.gridy = 3; c.gridx = 0; form.add(new JLabel("회원번호 (Skypass)"), c);
-        c.gridx = 1; form.add(memberNumberField, c);
-
-        c.gridy = 4; c.gridx = 0; form.add(new JLabel("비밀번호"), c);
+        c.gridy = 3; c.gridx = 0; form.add(new JLabel("비밀번호"), c);
         c.gridx = 1; form.add(passwordField, c);
 
-        c.gridy = 5; c.gridx = 0; form.add(new JLabel("비밀번호 확인"), c);
+        c.gridy = 4; c.gridx = 0; form.add(new JLabel("비밀번호 확인"), c);
         c.gridx = 1; form.add(confirmPasswordField, c);
 
-        c.gridy = 6; c.gridx = 0; c.gridwidth = 2;
+        c.gridy = 5; c.gridx = 0; c.gridwidth = 2;
         messageLabel.setForeground(new java.awt.Color(0xD32F2F));
         form.add(messageLabel, c);
 
         JPanel btnPanel = new JPanel(new GridBagLayout());
-        c.gridy = 7; c.gridwidth = 1; c.anchor = GridBagConstraints.CENTER;
+        c.gridy = 6; c.gridwidth = 1; c.anchor = GridBagConstraints.CENTER;
         JButton cancelBtn = new JButton("취소");
         JButton registerBtn = new JButton("회원가입");
         registerBtn.setPreferredSize(new Dimension(120, 34));
@@ -98,7 +94,6 @@ public class RegistrationDialog extends JDialog {
 
         String name = nameField.getText().trim();
         String email = emailField.getText().trim();
-        String memberNumber = memberNumberField.getText().trim();
         String password = new String(passwordField.getPassword());
         String confirmPassword = new String(confirmPasswordField.getPassword());
 
@@ -112,10 +107,6 @@ public class RegistrationDialog extends JDialog {
         }
         if (!email.contains("@")) {
             messageLabel.setText("이메일 형식이 올바르지 않습니다.");
-            return;
-        }
-        if (memberNumber.isEmpty()) {
-            messageLabel.setText("회원번호를 입력하세요.");
             return;
         }
         if (password.isEmpty()) {
@@ -134,13 +125,14 @@ public class RegistrationDialog extends JDialog {
         Member member = new Member();
         member.setName(name);
         member.setEmail(email);
+        String memberNumber = authService.generateSkypassNumber();
         member.setMemberNumber(memberNumber);
 
         try {
             authService.registerMember(member, memberNumber, password);
             registered = true;
             JOptionPane.showMessageDialog(this,
-                    "회원 가입이 완료되었습니다.\n로그인해 주세요.",
+                    "회원 가입이 완료되었습니다.\n회원번호: " + memberNumber + "\n로그인해 주세요.",
                     "회원 가입 완료", JOptionPane.INFORMATION_MESSAGE);
             dispose();
         } catch (IllegalArgumentException ex) {
