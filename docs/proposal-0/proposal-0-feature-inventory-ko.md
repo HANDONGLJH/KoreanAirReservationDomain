@@ -83,9 +83,6 @@ java -cp bin com.koreanair.reservation.app.swing.SwingApp
 
 ## <span style="color:red">📌 1. 시스템과 팀</span>
 
-> [!NOTE]
-> 🩹 **발표 단계 1 / 3** — 채운 내용 ① · 시스템 정의와 팀 분담
-
 ### <span style="color:red">1.1 시스템</span>
 
 - <span style="color:red">본 제안은 **대한항공 Skypass 티켓 예약 시스템**을 대상으로 한다.</span>
@@ -308,9 +305,6 @@ flowchart LR
 ---
 
 ## <span style="color:red">🎨 5. UML 다이어그램 (신규 추가)</span>
-
-> [!NOTE]
-> 🩹 **발표 단계 1 / 3** — 채운 내용 ② · UML 다이어그램 4종 (Use Case · Class · Sequence · State)
 
 > - <span style="color:red">본 섹션의 4종 다이어그램은 Iteration 1 시연 범위만 보여준다.</span>
 > - <span style="color:red">전체 최종 시스템 다이어그램이 아니라, 현재 코드에서 end-to-end로 실행되는 walking skeleton만 다룬다.</span>
